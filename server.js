@@ -30,18 +30,18 @@ function getJson(url) {
     });
 }
 
-// Find VS Code CDP endpoint
+// Find Antigravity CDP endpoint
 async function discoverCDP() {
     for (const port of PORTS) {
         try {
             const list = await getJson(`http://127.0.0.1:${port}/json/list`);
-            const found = list.find(t => t.url.includes('workbench.html') || (t.title && t.title.includes('workbench')));
-            if (found && found.webSocketDebuggerUrl) {
+            const found = list.find(t => t.webSocketDebuggerUrl);
+            if (found) {
                 return { port, url: found.webSocketDebuggerUrl };
             }
         } catch (e) { }
     }
-    throw new Error('CDP not found. Is VS Code started with --remote-debugging-port=9000?');
+    throw new Error('CDP not found. Is Antigravity started with --remote-debugging-port=9000?');
 }
 
 // Connect to CDP

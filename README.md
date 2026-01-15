@@ -1,122 +1,65 @@
-# Mobile Chat Monitor
+# Antigravity Mobile Monitor
 
-Web server for monitoring Antigravity chat from mobile devices with visual snapshots.
+Need to go to the bathroom? But Opus 4.5 might be done with that big task soon? Want to eat lunch? But there's more tokens left before they reset right after lunch?
 
-## Features
+A real-time mobile interface for monitoring and interacting with Antigravity chat sessions. 
 
-✅ **Smart Refresh**
-- Auto-updates every 3 seconds when chat content changes
-- Preserves scroll position during refresh
-- Pauses automatically when user is scrolling
-- Resumes after 10 seconds of idle time
+## How It Works
 
-✅ **Mobile-Friendly UI**
-- Responsive design optimized for phones/tablets
-- Touch-friendly controls
-- Visual replica of Antigravity chat with all styling
+It's a simple system, but pretty hacky.
 
-✅ **Message Injection**
-- Send messages to Antigravity directly from mobile
-- Auto-resize text input
-- Visual feedback on send status
+The mobile monitor operates through three main components:
 
-✅ **Controls**
-- Pause/Resume auto-refresh
-- Manual refresh button
-- Scroll to bottom FAB
-- Connection status indicator
+### 1. Reading (Snapshot Capture)
+The server connects to Antigravity via Chrome DevTools Protocol (CDP) and periodically captures **snapshots of the chat interface**:
+- Captures all CSS styles to preserve formatting
+- Captures the HTML of the chat interface
+- Buttons and everything that you wont be able to click
+- Polls every 3 seconds and only updates when content changes
 
-## Quick Start
+### 2. Injecting (Message Sending)
+Antigravity must be run in chrome with remote debugging enabled.
+Messages typed in the mobile interface are injected directly into Antigravity:
+- Locates the Antigravity chat input editor
+- Inserts the message text and triggers submission
+- Handles the input safely without interfering with ongoing operations
 
-### 1. Start VS Code with CDP
+### 3. Serving (Web Interface)
+A lightweight web server provides the mobile UI:
+- WebSocket connection for real-time updates
+- Auto-refresh when new content appears
+- Clean, responsive interface optimized for mobile devices
+- Send messages directly from your phone
+
+## Setup
+
+### 1. Start Antigravity with CDP
+
+Start Antigravity with Chrome DevTools Protocol enabled:
+
 ```bash
-code --remote-debugging-port=9000
+antigravity . --remote-debugging-port=9000
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 3. Start the Server
+### 3. Start the Monitor
+
 ```bash
-npm run server
+node server.js
 ```
 
 ### 4. Access from Mobile
-Open your browser and navigate to:
+
+Open your browser in the bathroom and navigate to:
 ```
-http://<your-computer-ip>:3000
-```
-
-**Finding your IP:**
-- Linux: `ip addr show | grep inet`
-- macOS: `ifconfig | grep inet`
-- Windows: `ipconfig`
-
-Use your local network IP (usually starts with `192.168.` or `10.`)
-
-## Configuration
-
-Edit `server.js` to change:
-- `POLL_INTERVAL` - How often to check for updates (default: 3000ms)
-- `PORT` - Server port (default: 3000)
-
-## Architecture
-
-```
-Mobile Device
-    ↓ HTTP/WebSocket
-Server.js (Express + WS)
-    ↓ Chrome DevTools Protocol
-VS Code (Antigravity)
+http://<your-local-ip>:3000
 ```
 
-**How it works:**
-1. Server connects to VS Code via CDP on port 9000
-2. Polls chat DOM every 3 seconds
-3. Captures full HTML + CSS snapshot
-4. Caches snapshot and computes hash
-5. If content changed, pushes update to mobile via WebSocket
-6. Mobile UI preserves scroll position and refreshes content
+This is over local network, so it will not work if you are on a different network, unless you use a VPN or something.
 
-## Troubleshooting
-
-**"CDP not found"**
-- Make sure VS Code is running with `--remote-debugging-port=9000`
-- Check ports 9000-9003 are not blocked
-
-**"No snapshot available"**
-- Wait a few seconds for first poll to complete
-- Try manual refresh button
-- Check browser console for errors
-
-**"Failed to send message"**
-- Verify Antigravity is not busy (cancel button visible)
-- Check if input field is visible in VS Code chat
-
-**Mobile can't connect**
-- Ensure phone is on same Wi-Fi network as computer
-- Check firewall allows connections on port 3000
-- Try `http://0.0.0.0:3000` on computer first
-
-## Comparison to Other PoCs
-
-| Feature | inject.js | read.js | render.js | **server.js** |
-|---------|-----------|---------|-----------|---------------|
-| Message injection | ✅ CLI | ❌ | ❌ | ✅ Web UI |
-| Read messages | ❌ | ✅ Text only | ❌ | ✅ Visual |
-| Visual fidelity | ❌ | ❌ | ✅ Snapshot | ✅ Live |
-| Mobile access | ❌ | ❌ | ❌ | ✅ |
-| Real-time updates | ❌ | ✅ Poll | ❌ | ✅ WebSocket |
-| Scroll preservation | N/A | N/A | N/A | ✅ |
-
-## Future Enhancements
-
-- [ ] Authentication/PIN code for security
-- [ ] Multiple device support
-- [ ] Conversation history persistence
-- [ ] Dark/light theme toggle
-- [ ] Desktop notifications when new messages arrive
-- [ ] Voice input support
-- [ ] Export conversation to PDF/Markdown
+The interface will automatically connect and display your Antigravity conversation in almost real-time.
