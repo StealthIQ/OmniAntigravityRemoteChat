@@ -33,15 +33,16 @@ echo "[READY] Server will be available at:"
 echo "      http://$MYIP:3000"
 echo ""
 
-# 4. Context Menu Implementation (Linux only)
-# REASON: Unlike Windows (Registry), Unix-like systems (Mac/Linux) use different 
-# Desktop Environments (GNOME, KDE, Finder) which lack a universal right-click standard.
-# This implementation targets Nautilus (GNOME) specifically for Linux users.
+# 4. Context Menu (Linux only - Nautilus)
+# REASON: Unlike Windows (Registry), Unix-like systems use different Desktop Environments.
+# macOS requires Automator (see README for manual steps). This targets Nautilus/GNOME.
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     NAUTILUS_PATH="$HOME/.local/share/nautilus/scripts"
     if [ -d "$NAUTILUS_PATH" ]; then
-        echo "[CONTEXT MENU] Found Nautilus. Add 'Open with Antigravity (Debug)' to Right-Click?"
-        read -p "Enter 'y' to install, or any other key to skip: " choice
+        echo "[CONTEXT MENU] Add 'Open with Antigravity (Debug)' to Right-Click?"
+        echo "Press 'y' within 4 seconds to install, or wait to skip..."
+        read -t 4 -n 1 choice
+        echo ""
         if [[ "$choice" == "y" ]]; then
             SCRIPT_FILE="$NAUTILUS_PATH/Open with Antigravity (Debug)"
             echo "#!/bin/bash" > "$SCRIPT_FILE"
@@ -54,10 +55,10 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 # 5. macOS Alias Tip
-# REASON: macOS 'Services/Quick Actions' require creating a .workflow file via Automator,
-# which cannot be done cleanly in a shell script. Alias is the standard power-user choice.
+# REASON: macOS 'Services/Quick Actions' require Automator. See README for step-by-step guide.
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "[TIP] On macOS, create a fast alias by running:"
+    echo "[TIP] For Right-Click on macOS, see README.md for Automator Quick Action setup."
+    echo "[TIP] Or create a fast alias by running:"
     echo "echo \"alias ag-debug='antigravity . --remote-debugging-port=9000'\" >> ~/.zshrc && source ~/.zshrc"
     echo ""
 fi

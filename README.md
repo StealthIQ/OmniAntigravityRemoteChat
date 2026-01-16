@@ -8,29 +8,70 @@
 
 ---
 
-## 🚀 Quick Start (Windows)
+## 🚀 Quick Start
 
-The easiest way to get started is using the provided automation script.
+### Windows
 
-### 1. Enable Antigravity Debugging
-You must launch Antigravity with the remote debugging port enabled. Run this command in your project folder:
-```bash
-antigravity . --remote-debugging-port=9000
-```
+1.  **Double-click `start_ag_phone_connect.bat`**
+    The script will:
+    - Verify Node.js is installed.
+    - Automatically install dependencies (`npm install`) if they are missing.
+    - Detect and display your **exact IP Address** (e.g., `http://192.168.1.5:3000`).
+    - *(Optional)* Ask if you want to add **"Open with Antigravity (Debug)"** to your Windows Right-Click menu for quick launching.
 
-### 2. Run the Monitor
-Simply double-click **`start_ag_phone_connect.bat`** in this folder.
-The script will:
-- Verify Node.js is installed.
-- Automatically install dependencies (`npm install`) if they are missing.
-- Detect and display your **Local IP Address**.
-- Start the server on port `3000`.
+2.  **Connect Your Phone**
+    - Ensure your phone is on the **same Wi-Fi network** as your PC.
+    - Open your mobile browser and enter the **URL shown in the terminal**.
 
-### 3. Connect Your Phone
-1. Ensure your phone is on the **same Wi-Fi network** as your PC.
-2. Look at the terminal window opened by the `.bat` file to find your `IPv4 Address`.
-3. Open your mobile browser and enter: `http://YOUR_IP:3000`
-   *(Example: `http://192.168.1.5:3000`)*
+3.  **Launch Antigravity** (if not already running)
+    - If you installed the Right-Click menu, simply right-click any project folder and select **"Open with Antigravity (Debug)"**.
+    - Otherwise, run manually: `antigravity . --remote-debugging-port=9000`
+
+---
+
+### macOS / Linux
+
+1.  **Run the launcher script**
+    ```bash
+    chmod +x start_ag_phone_connect.sh
+    ./start_ag_phone_connect.sh
+    ```
+    The script will:
+    - Verify Node.js is installed.
+    - Automatically install dependencies.
+    - Detect and display your **exact IP Address**.
+    - *(Linux only)* Offer to add a **Right-Click menu** entry for Nautilus/GNOME file manager.
+    - *(macOS)* Provide a command to create a fast shell alias (`ag-debug`).
+
+2.  **Connect Your Phone**
+    - Ensure your phone is on the **same Wi-Fi network**.
+    - Open your mobile browser and enter the **URL shown in the terminal**.
+
+3.  **Launch Antigravity** (if not already running)
+    ```bash
+    antigravity . --remote-debugging-port=9000
+    ```
+
+---
+
+### macOS: Adding Right-Click "Quick Action" (Optional)
+
+Since macOS requires Automator for context menu entries, follow these steps manually:
+
+1.  Open **Automator** (Spotlight → type "Automator").
+2.  Click **File → New** and select **Quick Action**.
+3.  At the top, set:
+    - "Workflow receives current" → **folders**
+    - "in" → **Finder**
+4.  In the left sidebar, search for **"Run Shell Script"** and drag it to the right pane.
+5.  Set "Shell" to `/bin/zsh` and "Pass input" to **as arguments**.
+6.  Paste this script:
+    ```bash
+    cd "$1"
+    antigravity . --remote-debugging-port=9000
+    ```
+7.  **Save** the Quick Action with a name like `Open with Antigravity (Debug)`.
+8.  Now you can right-click any folder in Finder → **Quick Actions → Open with Antigravity (Debug)**.
 
 ---
 
@@ -38,9 +79,9 @@ The script will:
 - **Real-Time Mirroring**: 1-second polling interval for a near-instant sync experience.
 - **Remote Control**: Send messages, stop generations, and switch Modes (Fast/Planning) or Models (Gemini/Claude/GPT) directly from your phone.
 - **Thought Expansion**: Tap on "Thinking..." or "Thought" blocks on your phone to remotely expand them in the desktop IDE.
-- **Smart Sync**: Bi-directional synchronization ensures your phone always shows the current Model and Mode selected on your desktop.
+- **Smart Sync**: Bi-directional synchronization ensures your phone always shows the current Model and Mode selected on your desktop. Press Refresh to force a full sync.
 - **Premium Mobile UI**: A sleek, dark-themed interface optimized for touch interaction and long-form reading.
-- **Zero-Config**: The launch scripts handle the heavy lifting of environment setup.
+- **Zero-Config**: The launch scripts handle the heavy lifting of environment setup and offer Right-Click integrations.
 
 ---
 
