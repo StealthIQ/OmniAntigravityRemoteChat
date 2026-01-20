@@ -147,6 +147,12 @@ async function connectCDP(url) {
             // Handle execution context events
             if (data.method === 'Runtime.executionContextCreated') {
                 contexts.push(data.params.context);
+            } else if (data.method === 'Runtime.executionContextDestroyed') {
+                const id = data.params.executionContextId;
+                const idx = contexts.findIndex(c => c.id === id);
+                if (idx !== -1) contexts.splice(idx, 1);
+            } else if (data.method === 'Runtime.executionContextsCleared') {
+                contexts.length = 0;
             }
         } catch (e) { }
     });
@@ -176,7 +182,12 @@ async function connectCDP(url) {
 async function captureSnapshot(cdp) {
     const CAPTURE_SCRIPT = `(() => {
         const cascade = document.getElementById('cascade');
-        if (!cascade) return { error: 'cascade not found' };
+        if (!cascade) {
+            // Debug info
+            const body = document.body;
+            const childIds = Array.from(body.children).map(c => c.id).filter(id => id).join(', ');
+            return { error: 'cascade not found', debug: { hasBody: !!body, availableIds: childIds } };
+        }
         
         const cascadeStyles = window.getComputedStyle(cascade);
         
@@ -200,14 +211,15 @@ async function captureSnapshot(cdp) {
         
         const html = clone.outerHTML;
         
-        let allCSS = '';
+        const rules = [];
         for (const sheet of document.styleSheets) {
             try {
                 for (const rule of sheet.cssRules) {
-                    allCSS += rule.cssText + '\\n';
+                    rules.push(rule.cssText);
                 }
             } catch (e) { }
         }
+        const allCSS = rules.join('\\n');
         
         return {
             html: html,
@@ -226,16 +238,30 @@ async function captureSnapshot(cdp) {
 
     for (const ctx of cdp.contexts) {
         try {
+            // console.log(`Trying context ${ctx.id} (${ctx.name || ctx.origin})...`);
             const result = await cdp.call("Runtime.evaluate", {
                 expression: CAPTURE_SCRIPT,
                 returnByValue: true,
                 contextId: ctx.id
             });
 
-            if (result.result && result.result.value) {
-                return result.result.value;
+            if (result.exceptionDetails) {
+                // console.log(`Context ${ctx.id} exception:`, result.exceptionDetails);
+                continue;
             }
-        } catch (e) { }
+
+            if (result.result && result.result.value) {
+                const val = result.result.value;
+                if (val.error) {
+                    // console.log(`Context ${ctx.id} script error:`, val.error);
+                    // if (val.debug) console.log(`   Debug info:`, JSON.stringify(val.debug));
+                } else {
+                    return val;
+                }
+            }
+        } catch (e) {
+            console.log(`Context ${ctx.id} connection error:`, e.message);
+        }
     }
 
     return null;
@@ -720,10 +746,33 @@ async function initCDP() {
 }
 
 // Background polling
-// Background polling
 async function startPolling(wss) {
-    setInterval(async () => {
-        if (!cdpConnection) return;
+    let lastErrorLog = 0;
+    let isConnecting = false;
+
+    const poll = async () => {
+        if (!cdpConnection || (cdpConnection.ws && cdpConnection.ws.readyState !== WebSocket.OPEN)) {
+            if (!isConnecting) {
+                console.log('🔍 Looking for Antigravity CDP connection...');
+                isConnecting = true;
+            }
+            if (cdpConnection) {
+                // Was connected, now lost
+                console.log('🔄 CDP connection lost. Attempting to reconnect...');
+                cdpConnection = null;
+            }
+            try {
+                await initCDP();
+                if (cdpConnection) {
+                    console.log('✅ CDP Connection established from polling loop');
+                    isConnecting = false;
+                }
+            } catch (err) {
+                // Not found yet, just wait for next cycle
+            }
+            setTimeout(poll, 2000); // Try again in 2 seconds if not found
+            return;
+        }
 
         try {
             const snapshot = await captureSnapshot(cdpConnection);
@@ -747,11 +796,29 @@ async function startPolling(wss) {
 
                     console.log(`📸 Snapshot updated (hash: ${hash})`);
                 }
+            } else {
+                // Snapshot is null or has error
+                const now = Date.now();
+                if (!lastErrorLog || now - lastErrorLog > 10000) {
+                    const errorMsg = snapshot?.error || 'No valid snapshot captured (check contexts)';
+                    console.warn(`⚠️  Snapshot capture issue: ${errorMsg}`);
+                    if (errorMsg === 'cascade not found') {
+                        console.log('   (Tip: Ensure an active chat is open in Antigravity)');
+                    }
+                    if (cdpConnection.contexts.length === 0) {
+                        console.log('   (Tip: No active execution contexts found. Try interacting with the Antigravity window)');
+                    }
+                    lastErrorLog = now;
+                }
             }
         } catch (err) {
             console.error('Poll error:', err.message);
         }
-    }, POLL_INTERVAL);
+
+        setTimeout(poll, POLL_INTERVAL);
+    };
+
+    poll();
 }
 
 // Create Express app
@@ -904,10 +971,15 @@ async function createServer() {
 async function main() {
     try {
         await initCDP();
+    } catch (err) {
+        console.warn(`⚠️  Initial CDP discovery failed: ${err.message}`);
+        console.log('💡 Start Antigravity with --remote-debugging-port=9000 to connect.');
+    }
 
+    try {
         const { server, wss, app, hasSSL } = await createServer();
 
-        // Start background polling
+        // Start background polling (it will now handle reconnections)
         startPolling(wss);
 
         // Remote Click

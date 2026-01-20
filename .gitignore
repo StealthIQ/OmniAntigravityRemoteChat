@@ -31,3 +31,6 @@ build/
 
 # SSL Certificates (generated locally)
 certs/
+
+# Registry
+registry/

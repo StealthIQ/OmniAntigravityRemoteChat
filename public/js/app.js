@@ -175,168 +175,172 @@ async function loadSnapshot() {
             if (statsText) statsText.textContent = `${nodes} Nodes · ${kbs}KB`;
         }
 
-        // --- DARK MODE INJECTION ---
-        const darkModeOverrides = `
-            <style>
-                ${data.css}
+        // --- CSS INJECTION (Cached) ---
+        let styleTag = document.getElementById('cdp-styles');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'cdp-styles';
+            document.head.appendChild(styleTag);
+        }
 
-                /* --- FORCE DARK MODE OVERRIDES --- */
-                :root {
-                    --bg-app: #0f172a;
-                    --text-main: #f8fafc;
-                    --text-muted: #94a3b8;
-                    --border-color: #334155;
-                }
+        const darkModeOverrides = '/* --- BASE SNAPSHOT CSS --- */\n' +
+            data.css +
+            '\n\n/* --- FORCE DARK MODE OVERRIDES --- */\n' +
+            ':root {\n' +
+            '    --bg-app: #0f172a;\n' +
+            '    --text-main: #f8fafc;\n' +
+            '    --text-muted: #94a3b8;\n' +
+            '    --border-color: #334155;\n' +
+            '}\n' +
+            '\n' +
+            '#cascade {\n' +
+            '    background-color: transparent !important;\n' +
+            '    color: var(--text-main) !important;\n' +
+            '    font-family: \'Inter\', system-ui, sans-serif !important;\n' +
+            '    position: relative !important;\n' +
+            '    height: auto !important;\n' +
+            '    width: 100% !important;\n' +
+            '}\n' +
+            '\n' +
+            '#cascade * {\n' +
+            '    position: static !important;\n' +
+            '}\n' +
+            '\n' +
+            '#cascade p, #cascade h1, #cascade h2, #cascade h3, #cascade h4, #cascade h5, #cascade span, #cascade div, #cascade li {\n' +
+            '    color: inherit !important;\n' +
+            '}\n' +
+            '\n' +
+            '#cascade a {\n' +
+            '    color: #60a5fa !important;\n' +
+            '    text-decoration: underline;\n' +
+            '}\n' +
+            '\n' +
+            '/* Fix Inline Code - Ultra-compact */\n' +
+            ':not(pre) > code {\n' +
+            '    padding: 0px 2px !important;\n' +
+            '    border-radius: 2px !important;\n' +
+            '    background-color: rgba(255, 255, 255, 0.1) !important;\n' +
+            '    font-size: 0.82em !important;\n' +
+            '    line-height: 1 !important;\n' +
+            '    white-space: normal !important;\n' +
+            '}\n' +
+            '\n' +
+            'pre, code, .monaco-editor-background, [class*="terminal"] {\n' +
+            '    background-color: #1e293b !important;\n' +
+            '    color: #e2e8f0 !important;\n' +
+            '    font-family: \'JetBrains Mono\', monospace !important;\n' +
+            '    border-radius: 3px;\n' +
+            '    border: 1px solid #334155;\n' +
+            '}\n' +
+            '                \n' +
+            '/* Multi-line Code Block - Minimal */\n' +
+            'pre {\n' +
+            '    position: relative !important;\n' +
+            '    white-space: pre-wrap !important; \n' +
+            '    word-break: break-word !important;\n' +
+            '    padding: 4px 6px !important;\n' +
+            '    margin: 2px 0 !important;\n' +
+            '    display: block !important;\n' +
+            '    width: 100% !important;\n' +
+            '}\n' +
+            '                \n' +
+            'pre.has-copy-btn {\n' +
+            '    padding-right: 28px !important;\n' +
+            '}\n' +
+            '                \n' +
+            '/* Single-line Code Block - Minimal */\n' +
+            'pre.single-line-pre {\n' +
+            '    display: inline-block !important;\n' +
+            '    width: auto !important;\n' +
+            '    max-width: 100% !important;\n' +
+            '    padding: 0px 4px !important;\n' +
+            '    margin: 0px !important;\n' +
+            '    vertical-align: middle !important;\n' +
+            '    background-color: #1e293b !important;\n' +
+            '    font-size: 0.85em !important;\n' +
+            '}\n' +
+            '                \n' +
+            'pre.single-line-pre > code {\n' +
+            '    display: inline !important;\n' +
+            '    white-space: nowrap !important;\n' +
+            '}\n' +
+            '                \n' +
+            'pre:not(.single-line-pre) > code {\n' +
+            '    display: block !important;\n' +
+            '    width: 100% !important;\n' +
+            '    overflow-x: auto !important;\n' +
+            '    background: transparent !important;\n' +
+            '    border: none !important;\n' +
+            '    padding: 0 !important;\n' +
+            '    margin: 0 !important;\n' +
+            '}\n' +
+            '                \n' +
+            '.mobile-copy-btn {\n' +
+            '    position: absolute !important;\n' +
+            '    top: 2px !important;\n' +
+            '    right: 2px !important;\n' +
+            '    background: rgba(30, 41, 59, 0.5) !important; /* Transparent bg */\n' +
+            '    color: #94a3b8 !important;\n' +
+            '    border: none !important;\n' +
+            '    width: 24px !important; \n' +
+            '    height: 24px !important;\n' +
+            '    padding: 0 !important;\n' +
+            '    cursor: pointer !important;\n' +
+            '    display: flex !important;\n' +
+            '    align-items: center !important;\n' +
+            '    justify-content: center !important;\n' +
+            '    border-radius: 4px !important;\n' +
+            '    transition: all 0.2s ease !important;\n' +
+            '    -webkit-tap-highlight-color: transparent !important;\n' +
+            '    z-index: 10 !important;\n' +
+            '    margin: 0 !important;\n' +
+            '}\n' +
+            '                \n' +
+            '.mobile-copy-btn:hover,\n' +
+            '.mobile-copy-btn:focus {\n' +
+            '    background: rgba(59, 130, 246, 0.2) !important;\n' +
+            '    color: #60a5fa !important;\n' +
+            '}\n' +
+            '                \n' +
+            '.mobile-copy-btn svg {\n' +
+            '    width: 16px !important;\n' +
+            '    height: 16px !important;\n' +
+            '    stroke: currentColor !important;\n' +
+            '    stroke-width: 2 !important;\n' +
+            '    fill: none !important;\n' +
+            '}\n' +
+            '                \n' +
+            'blockquote {\n' +
+            '    border-left: 3px solid #3b82f6 !important;\n' +
+            '    background: rgba(59, 130, 246, 0.1) !important;\n' +
+            '    color: #cbd5e1 !important;\n' +
+            '    padding: 8px 12px !important;\n' +
+            '    margin: 8px 0 !important;\n' +
+            '}\n' +
+            '\n' +
+            'table {\n' +
+            '    border-collapse: collapse !important;\n' +
+            '    width: 100% !important;\n' +
+            '    border: 1px solid #334155 !important;\n' +
+            '}\n' +
+            'th, td {\n' +
+            '    border: 1px solid #334155 !important;\n' +
+            '    padding: 8px !important;\n' +
+            '    color: #e2e8f0 !important;\n' +
+            '}\n' +
+            '\n' +
+            '::-webkit-scrollbar {\n' +
+            '    width: 0 !important;\n' +
+            '}\n' +
+            '                \n' +
+            '[style*=\"background-color: rgb(255, 255, 255)\"],\n' +
+            '[style*=\"background-color: white\"],\n' +
+            '[style*=\"background: white\"] {\n' +
+            '    background-color: transparent !important;\n' +
+            '}';
+        styleTag.textContent = darkModeOverrides;
+        chatContent.innerHTML = data.html;
 
-                #cascade {
-                    background-color: transparent !important;
-                    color: var(--text-main) !important;
-                    font-family: 'Inter', system-ui, sans-serif !important;
-                    position: relative !important;
-                    height: auto !important;
-                    width: 100% !important;
-                }
-
-                #cascade * {
-                    position: static !important;
-                }
-
-                #cascade p, #cascade h1, #cascade h2, #cascade h3, #cascade h4, #cascade h5, #cascade span, #cascade div, #cascade li {
-                    color: inherit !important;
-                }
-
-                #cascade a {
-                    color: #60a5fa !important;
-                    text-decoration: underline;
-                }
-
-                /* Fix Inline Code - Ultra-compact */
-                :not(pre) > code {
-                    padding: 0px 2px !important;
-                    border-radius: 2px !important;
-                    background-color: rgba(255, 255, 255, 0.1) !important;
-                    font-size: 0.82em !important;
-                    line-height: 1 !important;
-                    white-space: normal !important;
-                }
-
-                pre, code, .monaco-editor-background, [class*="terminal"] {
-                    background-color: #1e293b !important;
-                    color: #e2e8f0 !important;
-                    font-family: 'JetBrains Mono', monospace !important;
-                    border-radius: 3px;
-                    border: 1px solid #334155;
-                }
-                
-                /* Multi-line Code Block - Minimal */
-                pre {
-                    position: relative !important;
-                    white-space: pre-wrap !important; 
-                    word-break: break-word !important;
-                    padding: 4px 6px !important;
-                    margin: 2px 0 !important;
-                    display: block !important;
-                    width: 100% !important;
-                }
-                
-                pre.has-copy-btn {
-                    padding-right: 28px !important;
-                }
-                
-                /* Single-line Code Block - Minimal */
-                pre.single-line-pre {
-                    display: inline-block !important;
-                    width: auto !important;
-                    max-width: 100% !important;
-                    padding: 0px 4px !important;
-                    margin: 0px !important;
-                    vertical-align: middle !important;
-                    background-color: #1e293b !important;
-                    font-size: 0.85em !important;
-                }
-                
-                pre.single-line-pre > code {
-                    display: inline !important;
-                    white-space: nowrap !important;
-                }
-                
-                pre:not(.single-line-pre) > code {
-                    display: block !important;
-                    width: 100% !important;
-                    overflow-x: auto !important;
-                    background: transparent !important;
-                    border: none !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                }
-                
-                .mobile-copy-btn {
-                    position: absolute !important;
-                    top: 2px !important;
-                    right: 2px !important;
-                    background: rgba(30, 41, 59, 0.5) !important; /* Transparent bg */
-                    color: #94a3b8 !important;
-                    border: none !important;
-                    width: 24px !important; 
-                    height: 24px !important;
-                    padding: 0 !important;
-                    cursor: pointer !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    border-radius: 4px !important;
-                    transition: all 0.2s ease !important;
-                    -webkit-tap-highlight-color: transparent !important;
-                    z-index: 10 !important;
-                    margin: 0 !important;
-                }
-                
-                .mobile-copy-btn:hover,
-                .mobile-copy-btn:focus {
-                    background: rgba(59, 130, 246, 0.2) !important;
-                    color: #60a5fa !important;
-                }
-                
-                .mobile-copy-btn svg {
-                    width: 16px !important;
-                    height: 16px !important;
-                    stroke: currentColor !important;
-                    stroke-width: 2 !important;
-                    fill: none !important;
-                }
-                
-                blockquote {
-                    border-left: 3px solid #3b82f6 !important;
-                    background: rgba(59, 130, 246, 0.1) !important;
-                    color: #cbd5e1 !important;
-                    padding: 8px 12px !important;
-                    margin: 8px 0 !important;
-                }
-
-                table {
-                    border-collapse: collapse !important;
-                    width: 100% !important;
-                    border: 1px solid #334155 !important;
-                }
-                th, td {
-                    border: 1px solid #334155 !important;
-                    padding: 8px !important;
-                    color: #e2e8f0 !important;
-                }
-
-                ::-webkit-scrollbar {
-                    width: 0 !important;
-                }
-                
-                [style*="background-color: rgb(255, 255, 255)"],
-                [style*="background-color: white"],
-                [style*="background: white"] {
-                    background-color: transparent !important;
-                }
-            </style>
-        `;
-
-        chatContent.innerHTML = darkModeOverrides + data.html;
 
         // Add mobile copy buttons to all code blocks
         addMobileCopyButtons();
@@ -395,11 +399,11 @@ function addMobileCopyButtons() {
         copyBtn.setAttribute('data-code-index', index);
         copyBtn.setAttribute('aria-label', 'Copy code');
         copyBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            < svg viewBox = "0 0 24 24" stroke-linecap="round" stroke - linejoin="round" >
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-        `;
+            </svg >
+            `;
 
         // Add click handler for copy
         copyBtn.addEventListener('click', async (e) => {
@@ -412,36 +416,36 @@ function addMobileCopyButtons() {
                 // Visual feedback - show checkmark
                 copyBtn.classList.add('copied');
                 copyBtn.innerHTML = `
-                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                `;
+            < svg viewBox = "0 0 24 24" stroke - linecap="round" stroke - linejoin="round" >
+                <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg >
+            `;
 
                 // Reset after 2 seconds
                 setTimeout(() => {
                     copyBtn.classList.remove('copied');
                     copyBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            < svg viewBox = "0 0 24 24" stroke - linecap="round" stroke - linejoin="round" >
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    `;
+                        </svg >
+            `;
                 }, 2000);
             } else {
                 // Show X icon briefly on error
                 copyBtn.innerHTML = `
-                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            < svg viewBox = "0 0 24 24" stroke - linecap="round" stroke - linejoin="round" >
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                `;
+                    </svg >
+            `;
                 setTimeout(() => {
                     copyBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            < svg viewBox = "0 0 24 24" stroke - linecap="round" stroke - linejoin="round" >
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    `;
+                        </svg >
+            `;
                 }, 2000);
             }
         });

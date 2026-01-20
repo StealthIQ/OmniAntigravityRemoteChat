@@ -45,7 +45,11 @@ echo.
 echo [BACKUP] Exporting registry keys...
 :: Use PowerShell for locale-independent timestamp (works on all Windows locales)
 for /f %%a in ('powershell -command "Get-Date -Format 'yyyyMMdd_HHmmss'"') do set "TIMESTAMP=%%a"
-set "BACKUP_FILE=%~dp0context_menu_backup_%TIMESTAMP%.reg"
+
+:: Create registry folder if it doesn't exist
+if not exist "%~dp0registry" mkdir "%~dp0registry"
+
+set "BACKUP_FILE=%~dp0registry\context_menu_backup_%TIMESTAMP%.reg"
 reg export "HKEY_CLASSES_ROOT\Directory\Background\shell\AntigravityDebug" "%BACKUP_FILE%" /y 2>nul
 reg export "HKEY_CLASSES_ROOT\Directory\shell\AntigravityDebug" "%BACKUP_FILE%" /y 2>nul
 if exist "%BACKUP_FILE%" (
@@ -63,11 +67,11 @@ echo [INSTALL] Adding registry entries...
 
 :: Add to folder background (right-click empty space in folder)
 powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\Background\shell\AntigravityDebug\" /ve /d \"Open with Antigravity (Debug)\" /f' -Verb RunAs -Wait" 2>nul
-powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\Background\shell\AntigravityDebug\command\" /ve /d \"cmd /c cd /d %%V ^&^& antigravity . --remote-debugging-port=9000\" /f' -Verb RunAs -Wait" 2>nul
+powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\Background\shell\AntigravityDebug\command\" /ve /d \"cmd /c cd /d \\\"%%V\\\" ^&^& antigravity . --remote-debugging-port=9000\" /f' -Verb RunAs -Wait" 2>nul
 
 :: Add to folder itself (right-click on a folder)
 powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\shell\AntigravityDebug\" /ve /d \"Open with Antigravity (Debug)\" /f' -Verb RunAs -Wait" 2>nul
-powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\shell\AntigravityDebug\command\" /ve /d \"cmd /c cd /d %%1 ^&^& antigravity . --remote-debugging-port=9000\" /f' -Verb RunAs -Wait" 2>nul
+powershell -Command "Start-Process reg -ArgumentList 'add \"HKEY_CLASSES_ROOT\Directory\shell\AntigravityDebug\command\" /ve /d \"cmd /c cd /d \\\"%%1\\\" ^&^& antigravity . --remote-debugging-port=9000\" /f' -Verb RunAs -Wait" 2>nul
 
 echo.
 echo [SUCCESS] Context menu installed!
