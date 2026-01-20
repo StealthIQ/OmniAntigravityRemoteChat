@@ -7,7 +7,11 @@ antigravity_phone_chat/
 ├── generate_ssl.js         # SSL certificate generator (pure Node.js, no OpenSSL needed)
 ├── ui_inspector.js         # Utility for inspecting VS Code/Antigravity UI via CDP
 ├── public/
-│   └── index.html          # Mobile-optimized web frontend
+│   ├── index.html          # Mobile-optimized web frontend
+│   ├── css/
+│   │   └── style.css       # Main stylesheet (App aesthetics & layout)
+│   └── js/
+│       └── app.js          # Client-side logic (WebSocket, API calls, UI interactions)
 ├── certs/                   # SSL certificates directory (auto-generated, gitignored)
 │   ├── server.key          # Private key
 │   └── server.cert         # Self-signed certificate
@@ -134,3 +138,18 @@ The server automatically detects SSL certificates and enables HTTPS:
 - **Input Sanitization**: User input is escaped using `JSON.stringify` before CDP injection.
 
 > 📚 For detailed security information, browser warning bypass instructions, and recommendations, see [SECURITY.md](SECURITY.md).
+
+## Technical Implementation Details (Advanced)
+
+### Synchronization Philosophy: "Phone-as-Master"
+The system utilizes a unidirectional master-slave architecture for state management when active:
+- **Interaction Priority**: The mobile device is treated as the **Master Controller**. Any manual interaction (scrolling, clicking, typing) on the phone triggers an immediate CDP command to the Desktop.
+- **Scroll Synchronization**: Synchronization is strictly **Phone → Desktop**. This design choice prevents "sync-fighting" conflicts and allows the mobile user to maintain a stable viewport regardless of background window movement on the Desktop.
+- **Master-Slave Rebalancing**:
+    - **Lock Duration**: A `3000ms` lock is applied when the user touches the phone screen, protecting the mobile viewport from auto-scroll triggers caused by incoming message events.
+    - **Idle State**: After `5000ms` of inactivity, the phone enters an "Observation Mode" where it allows auto-scrolling to follow new incoming chat content.
+
+### Performance & Processing Efficiency
+- **Snapshot Polling**: The server polls the VS Code CDP endpoint every `1000ms` to check for UI changes.
+- **Delta Detection**: To minimize processing pressure, the system calculates a 36-char hash of the captured HTML. A full broadcast (Snapshot Update) ONLY occurs if the hash changes.
+- **Interaction Overhead**: Typical POST interactions (sending a message or changing a model) have a latency overhead of `<100ms`, making the remote interaction feel near-instant.
