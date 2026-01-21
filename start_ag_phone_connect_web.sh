@@ -66,9 +66,7 @@ echo "[INFO] .env configuration found."
 # 5. Launch everything via Python
 echo "[1/1] Launching Antigravity Phone Connect..."
 echo "(This will start both the server and the web tunnel)"
-echo
-
-python3 tunnel.py
+python3 launcher.py --mode web
 
 # 6. Auto-close when done
 exit 0

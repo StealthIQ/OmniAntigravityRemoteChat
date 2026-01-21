@@ -111,6 +111,7 @@ function getJson(url) {
 
 // Find Antigravity CDP endpoint
 async function discoverCDP() {
+    const errors = [];
     for (const port of PORTS) {
         try {
             const list = await getJson(`http://127.0.0.1:${port}/json/list`);
@@ -119,9 +120,12 @@ async function discoverCDP() {
             if (found && found.webSocketDebuggerUrl) {
                 return { port, url: found.webSocketDebuggerUrl };
             }
-        } catch (e) { }
+        } catch (e) {
+            errors.push(`${port}: ${e.message}`);
+        }
     }
-    throw new Error('CDP not found. Is Antigravity started with --remote-debugging-port=9000?');
+    const errorSummary = errors.length ? `Errors: ${errors.join(', ')}` : 'No ports responding';
+    throw new Error(`CDP not found on ports ${PORTS.join(',')}. ${errorSummary}. Is Antigravity started with --remote-debugging-port=9000?`);
 }
 
 // Connect to CDP
@@ -768,9 +772,9 @@ function isLocalRequest(req) {
 
 // Initialize CDP connection
 async function initCDP() {
-    console.log('🔍 Discovering VS Code CDP endpoint...');
+    console.log('🔍 Discovering Antigravity CDP endpoint...');
     const cdpInfo = await discoverCDP();
-    console.log(`✅ Found VS Code on port ${cdpInfo.port}`);
+    console.log(`✅ Found Antigravity on port ${cdpInfo.port}`);
 
     console.log('🔌 Connecting to CDP...');
     cdpConnection = await connectCDP(cdpInfo.url);
@@ -902,6 +906,17 @@ async function createServer() {
         // Exempt local Wi-Fi devices from authentication
         if (isLocalRequest(req)) {
             return next();
+        }
+
+        // Magic Link / QR Code Auto-Login
+        if (req.query.key === APP_PASSWORD) {
+            res.cookie(AUTH_COOKIE_NAME, AUTH_TOKEN, {
+                httpOnly: true,
+                signed: true,
+                maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+            });
+            // Remove the key from the URL by redirecting to the base path
+            return res.redirect('/');
         }
 
         const token = req.signedCookies[AUTH_COOKIE_NAME];
