@@ -4,6 +4,34 @@ All notable changes to **Antigravity Phone Connect** are documented here, in rev
 
 ---
 
+## v0.2.1 - Magic Links & Unified Launcher ✨
+**Release Date:** January 21, 2026
+
+---
+
+### ✨ NEW: Magic Link Auto-Login
+- **QR Code Magic**: In Web Mode, the QR code now embeds your password! Just scan it to log in instantly—no typing required.
+- **Smart Redirects**: Automatically sets your secure session cookie and seamlessly redirects you to the app interface.
+
+### 🚀 Unified Launcher Experience
+- **One Script to Rule Them All**: Introduced `launcher.py`, a robust Python core that powers both Local and Web modes.
+- **Improved Local Mode**:
+  - Automatically detects if you have SSL certificates and generates the correct `https://` local URL.
+  - Generates a QR code for your local Wi-Fi IP for easy connecting.
+- **Cleaner Interface**:
+  - Server logs are now redirected to `server_log.txt`, keeping your terminal screen calm and focused.
+  - Displays clear, numbered steps for connecting on both Local and Web modes.
+
+### 🛡️ Enhanced Troubleshooting
+- **Real-Time Diagnostics**: The launcher now monitors the server log in real-time.
+- **Immediate Alerts**: If the server can't find the Antigravity editor (CDP), it instantly flashes a **RED WARNING** in the terminal with specific fix instructions (e.g., "Open with Antigravity (Debug)").
+
+### 🐛 Bug Fixes
+- **Socket Error**: Fixed a crash in `launcher.py` related to `socket.AF_INET` initialization.
+- **HTTPS Mismatch**: Fixed an issue where Local Mode would generate `http://` links even when the server was running securely on `https://`.
+
+---
+
 ## v0.2.0 - Global Remote Access (Web Mode) 🌍
 **Release Date:** January 21, 2026
 
@@ -38,7 +66,7 @@ All notable changes to **Antigravity Phone Connect** are documented here, in rev
 ### ✨ Key Improvements
 
 #### 🔄 Smart Reconnection
-- **Auto-Recovery**: Server now automatically detects lost CDP connections (e.g., if you close/reopen VS Code) and reconnects without needing a restart.
+- **Auto-Recovery**: Server now automatically detects lost CDP connections (e.g., if you close/reopen Antigravity) and reconnects without needing a restart.
 - **Resilient Startup**: You can now start the server *before* Antigravity. It will patiently poll ("🔍 Looking for Antigravity...") until it finds the debug port.
 - **Context Awareness**: Improved logic to track active execution contexts, preventing "stuck" snapshots when tabs are closed or refreshed.
 
@@ -259,7 +287,7 @@ We are thrilled to announce the **first official release** of **Antigravity Phon
 
 - **CDP Port Range**: Auto-discovery scans ports 9000-9003.
 - **macOS Context Menu**: Requires manual Automator Quick Action setup.
-- **Theme Variance**: Some extreme custom VS Code themes may render differently on mobile.
+- **Theme Variance**: Some extreme custom Antigravity themes may render differently on mobile.
 
 ---
 

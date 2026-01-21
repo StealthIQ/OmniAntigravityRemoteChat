@@ -48,11 +48,11 @@ chmod +x start_ag_phone_connect.sh   # First time only
 ```
 
 The script will:
-- Verify Node.js is installed
-- Install dependencies if missing
+- Verify Node.js and Python dependencies
 - Auto-kill any existing server on port 3000
 - **Wait for Antigravity** if it's not started yet
-- Display your **exact IP Address** (e.g., `https://192.168.1.5:3000`)
+- Display a **QR Code** and your **Link** (e.g., `https://192.168.1.5:3000`)
+- Provide numbered steps for easy connection
 
 ### Step 4: Connect Your Phone (Local Wi-Fi)
 
@@ -81,9 +81,12 @@ Access your Antigravity session from **anywhere in the world** (Mobile Data, out
 - **Mac/Linux**: Run `./start_ag_phone_connect_web.sh`
 
 The script will launch the server and provide a **Public URL** (e.g., `https://abcd-123.ngrok-free.app`). 
-1. Open this URL on your phone (no Wi-Fi needed!).
-2. Enter your `APP_PASSWORD` to log in.
-3. Enjoy full control from your mobile network!
+
+**Two Ways to Connect:**
+1. **Magic Link (Easiest)**: Scan the **Magic QR Code** displayed in the terminal. It logs you in automatically!
+2. **Manual**: 
+   - Open the URL on your phone.
+   - Enter your `APP_PASSWORD` to log in.
 
 > 💡 **Tip:** Devices on the same local Wi-Fi still enjoy direct access without needing a password.
 

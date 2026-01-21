@@ -9,13 +9,13 @@ Antigravity Phone Connect isn't a replacement for the desktop IDE; it's a **wire
 ## Design Principles
 
 ### 1. Robustness Over Precision
-Selecting elements in a dynamically changing IDE like VS Code is brittle. This project prioritizes **Text-Based Selection** and **Fuzzy Matching**. Instead of looking for `.button-32x`, we look for an element that *looks like a button* and *contains the word "Gemini"*.
+Selecting elements in a dynamically changing IDE like Antigravity is brittle. This project prioritizes **Text-Based Selection** and **Fuzzy Matching**. Instead of looking for `.button-32x`, we look for an element that *looks like a button* and *contains the word "Gemini"*.
 
 ### 2. Zero-Impact Mirroring
 The snapshot system clones the DOM before capturing. This ensures that the mirroring process doesn't interfere with the developer's cursor, scroll position, or focus on the Desktop machine.
 
 ### 3. Visual Parity (The Dark Mode Bridge)
-VS Code themes have thousands of CSS variables. Instead of trying to mirror every variable perfectly, we use **Aggressive CSS Inheritance**. The frontend captures the raw HTML and wraps it in a modern, slate-dark UI that feels premium and natively mobile, regardless of the Desktop's theme.
+Antigravity themes have thousands of CSS variables. Instead of trying to mirror every variable perfectly, we use **Aggressive CSS Inheritance**. The frontend captures the raw HTML and wraps it in a modern, slate-dark UI that feels premium and natively mobile, regardless of the Desktop's theme.
 
 ### 4. Security-First Local Access
 - **HTTPS by Default**: When SSL certificates are generated, the server automatically uses HTTPS.

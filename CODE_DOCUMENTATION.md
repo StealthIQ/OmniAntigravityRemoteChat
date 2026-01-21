@@ -5,7 +5,7 @@
 antigravity_phone_chat/
 ├── server.js                       # Main Node.js server (Express + WebSocket + CDP + HTTPS)
 ├── generate_ssl.js                 # SSL certificate generator (pure Node.js, no OpenSSL needed)
-├── ui_inspector.js                 # Utility for inspecting VS Code/Antigravity UI via CDP
+├── ui_inspector.js                 # Utility for inspecting Antigravity UI via CDP
 ├── public/
 │   ├── index.html                  # Mobile-optimized web frontend
 │   ├── css/
@@ -19,7 +19,8 @@ antigravity_phone_chat/
 ├── start_ag_phone_connect_web.bat  # Web Windows launcher (Starts server + Global Tunnel)
 ├── start_ag_phone_connect.sh       # Standard Mac/Linux launcher (LAN)
 ├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
-├── tunnel.py                       # Python script managing the ngrok tunnel & passcodes
+├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
+├── launcher.py                     # Unified Python launcher (Manages Server, Tunnel, QR Codes)
 ├── .env                            # Local configuration (Passwords & API Tokens)
 ├── package.json                    # Dependencies and metadata
 ├── LICENSE                         # GPL v3 License
@@ -27,12 +28,12 @@ antigravity_phone_chat/
 ```
 
 ## High-Level Architecture
-The system acts as a "Headless Mirror" of the Antigravity session running on a Desktop machine. It utilizes the **Chrome DevTools Protocol (CDP)** to bridge the gap between a local VS Code instance and a remote mobile browser.
+The system acts as a "Headless Mirror" of the Antigravity session running on a Desktop machine. It utilizes the **Chrome DevTools Protocol (CDP)** to bridge the gap between a local Antigravity instance and a remote mobile browser.
 
 ### Data Flow
 ```mermaid
 graph TD
-    AG[Antigravity / VS Code] -- CDP Snapshots --> S[Node.js Server]
+    AG[Antigravity] -- CDP Snapshots --> S[Node.js Server]
     S -- WebSocket Status --> P[Phone Frontend]
     P -- GET /snapshot --> S
     P -- POST /login --> S
@@ -40,7 +41,7 @@ graph TD
     T[ngrok Tunnel] -- Proxy --> S
     P[Phone Frontend] -- Mobile Data --> T
     S -- CDP Commands --> AG
-    PY[tunnel.py Manager] -- Spawns/Kills --> S
+    PY[launcher.py Manager] -- Spawns/Kills --> S
     PY -- Monitors --> T
 ```
 
@@ -85,8 +86,9 @@ graph TD
 
 ### 1. Global Web Access (Tunneling)
 When using the `_web` launcher, the system utilizes `ngrok` to create a secure tunnel. 
-- **Process Management**: `tunnel.py` acts as a supervisor, spawning the Node.js server as a child process. This ensures that when the tunnel is closed (Ctrl+C), the server is also reliably terminated.
-- **Auto-Protocol Detection**: `tunnel.py` detects if the local server is running HTTPS and configures the tunnel accordingly.
+- **Unified Manager**: `launcher.py` acts as a supervisor, spawning the Node.js server as a child process. This ensures that when the tunnel is closed (Ctrl+C), the server is also reliably terminated.
+- **Magic Links**: In Web Mode, the launcher generates a "Magic QR Code" that includes the `?key=PASSWORD` parameter, allowing for instant, zero-typing auto-login on mobile.
+- **Auto-Protocol Detection**: `launcher.py` detects if the local server is running HTTPS and configures the tunnel accordingly.
 - **Passcode Generation**: If no `APP_PASSWORD` is set in `.env`, a temporary 6-digit numeric passcode is generated for the session.
 - **Setup Assistant**: The launchers include a smart check for `.env` files; if missing, they provide an interactive prompt to generate a template configuration.
 
@@ -122,7 +124,7 @@ The server automatically detects SSL certificates and enables HTTPS:
 - **os**: Node.js built-in for local IP detection.
 - **fs**: Node.js built-in for SSL certificate file reading.
 - **https**: Node.js built-in for secure server (when SSL enabled).
-- **Chrome DevTools Protocol (CDP)**: The underlying bridge to VS Code's browser-based UI.
+- **Chrome DevTools Protocol (CDP)**: The underlying bridge to Antigravity's browser-based UI.
 
 ## Execution Flow
 
@@ -178,6 +180,6 @@ The system utilizes a unidirectional master-slave architecture for state managem
     - **Idle State**: After `5000ms` of inactivity, the phone enters an "Observation Mode" where it allows auto-scrolling to follow new incoming chat content.
 
 ### Performance & Processing Efficiency
-- **Snapshot Polling**: The server polls the VS Code CDP endpoint every `1000ms` to check for UI changes.
+- **Snapshot Polling**: The server polls the Antigravity CDP endpoint every `1000ms` to check for UI changes.
 - **Delta Detection**: To minimize processing pressure, the system calculates a 36-char hash of the captured HTML. A full broadcast (Snapshot Update) ONLY occurs if the hash changes.
 - **Interaction Overhead**: Typical POST interactions (sending a message or changing a model) have a latency overhead of `<100ms`, making the remote interaction feel near-instant.
