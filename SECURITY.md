@@ -112,9 +112,11 @@ To secure your session when accessing it globally, Antigravity Phone Connect now
 3. **Session Cookies**: Once logged in, your browser stores a secure, signed cookie valid for 30 days.
 
 ### Configuration
-Set your custom password in the `.env` file:
+1. Copy `.env.example` to `.env`.
+2. Set your custom password and API keys in the `.env` file:
 ```env
 APP_PASSWORD=your_secure_password
+XXX_API_KEY=your-ai-provider-key
 ```
 *If no password is set, the server will generate a **temporary 6-digit passcode** each time it starts and display it in the terminal.*
 
@@ -141,7 +143,7 @@ APP_PASSWORD=your_secure_password
 | Method | Safety | Recommendation |
 |----------|--------|----------------|
 | **Local Wi-Fi** | 🟢 High | Default mode, no password required. |
-| **_web Mode (ngrok)** | 🟡 Medium | Use `APP_PASSWORD` in `.env` for secure global access. |
+| **_web Mode (ngrok)** | 🟡 Medium | Use `APP_PASSWORD` in `.env` (cloned from `.env.example`) for secure global access. |
 | **Port Forwarding** | 🔴 Low | **NOT RECOMMENDED**. Use the built-in `_web` tunnel instead. |
 
 ### Recommendations

@@ -51,6 +51,7 @@ First off, thank you for considering contributing to Antigravity Phone Connect! 
 | `public/index.html` | Mobile UI - CSS and JS are inline |
 | `generate_ssl.js` | SSL cert generator - uses pure Node.js crypto |
 | `certs/` | Generated SSL files - gitignored, never commit |
+| `.env.example` | Template for environment variables |
 | `SECURITY.md` | Security documentation - update for security changes |
 | `*.sh` files | Must have LF line endings for Linux/macOS |
 

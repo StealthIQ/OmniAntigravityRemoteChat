@@ -21,7 +21,8 @@ antigravity_phone_chat/
 ├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
 ├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
 ├── launcher.py                     # Unified Python launcher (Manages Server, Tunnel, QR Codes)
-├── .env                            # Local configuration (Passwords & API Tokens)
+├── .env                            # Local configuration (Passwords & API Tokens - gitignored)
+├── .env.example                    # Template for environment variables
 ├── package.json                    # Dependencies and metadata
 ├── LICENSE                         # GPL v3 License
 └── README.md                       # Quick-start guide
@@ -90,7 +91,7 @@ When using the `_web` launcher, the system utilizes `ngrok` to create a secure t
 - **Magic Links**: In Web Mode, the launcher generates a "Magic QR Code" that includes the `?key=PASSWORD` parameter, allowing for instant, zero-typing auto-login on mobile.
 - **Auto-Protocol Detection**: `launcher.py` detects if the local server is running HTTPS and configures the tunnel accordingly.
 - **Passcode Generation**: If no `APP_PASSWORD` is set in `.env`, a temporary 6-digit numeric passcode is generated for the session.
-- **Setup Assistant**: The launchers include a smart check for `.env` files; if missing, they provide an interactive prompt to generate a template configuration.
+- **Setup Assistant**: Launchers check for `.env`; if missing, they automatically create it using `.env.example` as a template and instruct the user to update it.
 
 ### 2. Password Protection
 - **Session Management**: Uses signed, `httpOnly` cookies for maximum browser security.
@@ -99,12 +100,12 @@ When using the `_web` launcher, the system utilizes `ngrok` to create a secure t
 
 ### Setup (First Time)
 1. **Get an ngrok Token**: Sign up for free at [ngrok.com](https://ngrok.com) and get your "Authtoken".
-2. **Automatic Configuration**: Simply run the `_web` script (below). It will detect your missing configuration and offer to create a template `.env` file for you!
-3. **Manual Backup**: Alternatively, create a `.env` file manually:
-   ```env
-   NGROK_AUTHTOKEN=your_token_here
-   APP_PASSWORD=your_secure_passcode
+2. **Automatic Configuration**: Simply run any launcher script. They will detect if `.env` is missing and create it from `.env.example`.
+3. **Manual Setup**: Alternatively, create a `.env` file manually or copy the example:
+   ```bash
+   cp .env.example .env
    ```
+   Then update `NGROK_AUTHTOKEN`, `APP_PASSWORD`, and any AI provider keys (e.g., `GROQ_API_KEY`).
 
 ### 3. HTTPS/SSL Support
 The server automatically detects SSL certificates and enables HTTPS:

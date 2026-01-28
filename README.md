@@ -68,11 +68,17 @@ Access your Antigravity session from **anywhere in the world** (Mobile Data, out
 
 ### Setup (First Time)
 1. **Get an ngrok Token**: Sign up for free at [ngrok.com](https://ngrok.com) and get your "Authtoken".
-2. **Automatic Configuration (Recommended)**: Simply run the `_web` script (below). It will detect your missing configuration and offer to create a template `.env` file for you automatically!
-3. **Manual Backup**: Alternatively, create a `.env` file manually in the project root:
+2. **Automatic Configuration (Recommended)**: Simply run any launcher script. They will detect if `.env` is missing and automatically create it using `.env.example` as a template.
+3. **Manual Setup**: Alternatively, copy `.env.example` to `.env` manually and update the values:
+   ```bash
+   copy .env.example .env   # Windows
+   cp .env.example .env     # Mac/Linux
+   ```
+   Update the `.env` file with your details:
    ```env
    NGROK_AUTHTOKEN=your_token_here
    APP_PASSWORD=your_secure_passcode
+   XXX_API_KEY=your-ai-provider-key
    PORT=3000
    ```
 
