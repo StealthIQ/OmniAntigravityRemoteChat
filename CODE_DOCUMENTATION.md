@@ -60,7 +60,7 @@ graph TD
 | `setMode()` / `setModel()` | Robust text-based selectors to change AI settings remotely. |
 | `clickElement()` | Relays a physical click from the phone to a specific element index on Desktop. |
 | `remoteScroll()` | Syncs phone scroll position to Desktop Antigravity chat. |
-| `getAppState()` | Syncs Mode/Model status by scraping the Desktop UI text nodes (detects clickable elements). |
+| `getAppState()` | Syncs Mode/Model status and detects history visibility. |
 | `gracefulShutdown()` | Handles SIGINT/SIGTERM for clean server shutdown. |
 | `createServer()` | Creates Express app with automatic HTTP/HTTPS detection based on SSL cert availability. |
 
@@ -157,7 +157,10 @@ The server automatically detects SSL certificates and enables HTTPS:
 
 - **Snapshot Updates**: If content hash changes, clients are notified via WebSocket
 - **Rendering**: Mobile client fetches latest HTML/CSS and renders in a sandboxed div
-- **Interaction**: User actions (Send, Stop, Mode/Model changes) are POST requests → CDP commands
+- **History Management**: 
+    - A dedicated **History Icon** in the mobile header allows toggling a full-screen drawer.
+    - The drawer displays recently opened chats captured from the desktop's history panel.
+    - Tapping a history item triggers a remote click on the desktop to switch conversations.
 - **Scroll Sync**: Phone scroll position syncs to Desktop with user scroll lock protection
 - **Shutdown**: On SIGINT/SIGTERM, server gracefully closes all connections before exit
 

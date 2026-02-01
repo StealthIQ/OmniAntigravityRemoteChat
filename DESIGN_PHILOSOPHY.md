@@ -21,14 +21,17 @@ Antigravity themes have thousands of CSS variables. Instead of trying to mirror 
 - **HTTPS by Default**: When SSL certificates are generated, the server automatically uses HTTPS.
 - **Hybrid SSL Generation**: Tries OpenSSL first (better IP SAN support), falls back to Node.js crypto (zero dependencies).
 - **Auto IP Detection**: Certificates include your local network IP addresses for better browser compatibility.
-- **LAN Constraint**: The app is constrained to the local area network by default, ensuring your proprietary project snapshots aren't exposed to the public internet.
+- **LAN Constraint & Global Freedom**: By default, it stays on LAN for privacy. However, the `_web` mode introduces secure tunneling for global access, prioritizing **Freedom of Movement** without sacrificing security.
+
+### 5. Mobile-First Navigation (History Management)
+The mobile UI now features a **Full-screen History Layer**. This design choice reflects the reality that mobile screens are too small for sidebar navigation. By using a modal-layered approach, we provide high-density information (recent chats) without cluttering the primary viewing area.
 
 > 📚 For browser warning bypass instructions and security recommendations, see [SECURITY.md](SECURITY.md).
 
 ### 5. Resilient Error Handling
 - **Optimistic Updates**: Message sending clears the input immediately and refreshes to verify.
-- **No Error Popups**: Silent failures are logged but don't interrupt the user experience.
-- **Memory Leak Prevention**: Centralized CDP message handling with timeout cleanup.
+- **Layered Interaction**: Using full-screen overlays for history management ensures that complex navigation doesn't interfere with the real-time session mirroring.
+- **Silent Failure resilience**: Memory leak prevention and centralized CDP handling ensure the server stays up even if the desktop session is volatile.
 - **Graceful Shutdown**: Clean exit on Ctrl+C, closing all connections properly.
 
 ## Human-Centric Features

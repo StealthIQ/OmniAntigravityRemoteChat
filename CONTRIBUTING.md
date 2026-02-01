@@ -48,7 +48,7 @@ First off, thank you for considering contributing to Antigravity Phone Connect! 
 | Directory/File | Purpose |
 | :--- | :--- |
 | `server.js` | Main server - add new API endpoints here |
-| `public/index.html` | Mobile UI - CSS and JS are inline |
+| `public/` | Mobile UI files (index.html, css/style.css, js/app.js) |
 | `generate_ssl.js` | SSL cert generator - uses pure Node.js crypto |
 | `certs/` | Generated SSL files - gitignored, never commit |
 | `.env.example` | Template for environment variables |

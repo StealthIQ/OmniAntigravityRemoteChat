@@ -20,7 +20,7 @@ Start Antigravity with the remote debugging port enabled:
 
 **Option A: Using Right-Click Context Menu (Recommended)**
 - Run `install_context_menu.bat` (Windows) or `./install_context_menu.sh` (Linux) and select **[1] Install**
-- Then right-click any project folder → **"Open with Antigravity (Debug)"**
+- Then right-click any project folder → **"Open with Antigravity (Debug)"** (now with visual icons!)
 
 **Option B: Manual Command**
 ```bash
@@ -148,8 +148,10 @@ Since macOS requires Automator for context menu entries, follow these steps manu
 
 ## ✨ Features
 
-- **🌍 Global Web Access (NEW!)**: Secure remote access via ngrok tunnel. Access your AI from mobile data with passcode protection.
-- **🛡️ Auto-Cleanup (NEW!)**: Launchers now automatically sweep away "ghost" processes from previous sessions for a clean start every time.
+- **📜 Chat History (NEW!)**: Full-screen history management layer for mobile. Switch between multiple conversations easily.
+- **🖼️ Context Menu Icons (NEW!)**: Visual icons in the right-click menu for better navigation.
+- **🌍 Global Web Access**: Secure remote access via ngrok tunnel. Access your AI from mobile data with passcode protection.
+- **🛡️ Auto-Cleanup**: Launchers now automatically sweep away "ghost" processes from previous sessions for a clean start every time.
 - **🔒 HTTPS Support**: Secure connections with self-signed SSL certificates.
 - **Real-Time Mirroring**: 1-second polling interval for near-instant sync.
 - **Remote Control**: Send messages, stop generations, and switch Modes (Fast/Planning) or Models (Gemini/Claude/GPT) directly from your phone.
