@@ -47,6 +47,7 @@ The mobile UI now features a **Full-screen History Layer**. This design choice r
 | :--- | :--- |
 | Self-signed certs (not CA) | Simpler setup, works offline, no domain needed |
 | Pure Node.js SSL generation | No OpenSSL dependency, works on all platforms |
-| No authentication | Simplicity for LAN use; add VPN for remote access |
+| Passcode-Protected Web Mode | Secure remote access without the friction of full OAuth |
+| LAN Auto-Authorization | High convenience for the developer's primary workspace |
 | Optimistic message sending | Better UX; message usually succeeds even if CDP reports issues |
 | Multiple snapshot reloads | Catches UI animations that complete after initial delay |

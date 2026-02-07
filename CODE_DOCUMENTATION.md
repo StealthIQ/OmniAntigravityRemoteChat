@@ -19,7 +19,8 @@ antigravity_phone_chat/
 ├── start_ag_phone_connect_web.bat  # Web Windows launcher (Starts server + Global Tunnel)
 ├── start_ag_phone_connect.sh       # Standard Mac/Linux launcher (LAN)
 ├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
-├── start_ag_phone_connect_web.sh   # Web Mac/Linux launcher (Starts server + Global Tunnel)
+├── install_context_menu.bat        # Windows Context Menu installer/manager
+├── install_context_menu.sh         # Linux Context Menu installer (Creates .desktop files)
 ├── launcher.py                     # Unified Python launcher (Manages Server, Tunnel, QR Codes)
 ├── .env                            # Local configuration (Passwords & API Tokens - gitignored)
 ├── .env.example                    # Template for environment variables
@@ -61,8 +62,12 @@ graph TD
 | `clickElement()` | Relays a physical click from the phone to a specific element index on Desktop. |
 | `remoteScroll()` | Syncs phone scroll position to Desktop Antigravity chat. |
 | `getAppState()` | Syncs Mode/Model status and detects history visibility. |
+| `startNewChat()` | Triggers the "New Chat" action on Desktop. |
+| `getChatHistory()` | Scrapes the Antigravity history panel for active/past conversations. |
+| `selectChat()` | Switches the desktop session to a specific conversation title. |
+| `hasChatOpen()` | Verifies if the editor and chat container are currently rendered. |
 | `gracefulShutdown()` | Handles SIGINT/SIGTERM for clean server shutdown. |
-| `createServer()` | Creates Express app with automatic HTTP/HTTPS detection based on SSL cert availability. |
+| `createServer()` | Creates Express app with automatic HTTP/HTTPS detection and Auth middleware. |
 
 ## API Endpoints
 
@@ -78,10 +83,16 @@ graph TD
 | `/stop` | POST | Stops the current AI generation. |
 | `/set-mode` | POST | Changes mode to Fast or Planning. |
 | `/set-model` | POST | Changes the AI model. |
+| `/new-chat` | POST | Starts a new chat session. |
+| `/chat-history`| GET | Returns list of recently captured conversation titles. |
+| `/select-chat` | POST | Switches the desktop session to a selected conversation. |
+| `/chat-status` | GET | Returns status of the chat container and editor. |
 | `/remote-click` | POST | Triggers a click event on Desktop (for Thought expansion). |
 | `/remote-scroll` | POST | Syncs phone scroll position to Desktop Antigravity. |
 | `/generate-ssl` | POST | Generates SSL certificates (for HTTPS setup via UI). |
 | `/debug-ui` | GET | Returns serialized UI tree for debugging. |
+| `/ui-inspect` | GET | Returns detailed button and icon metadata for development. |
+| `/cdp-targets` | GET | Lists available CDP discovery targets for troubleshooting. |
 
 ## Security & Authentication
 
@@ -166,9 +177,9 @@ The server automatically detects SSL certificates and enables HTTPS:
 
 ## Security Considerations
 
-- **Self-Signed Certificates**: The generated certificates are self-signed and browser will show a warning on first visit.
-- **Local Network Only**: By default, only accessible on LAN. Not exposed to internet.
-- **No Authentication**: Currently no auth layer - anyone on the same network can access.
+- **Self-Signed Certificates**: The generated certificates are self-signed; browsers will show a warning on the first visit.
+- **Selective Access**: LAN devices have automatic access. External tunnel connections (Web Mode) require a passcode or Magic Link.
+- **Session Security**: Uses signed, `httpOnly` cookies for authentication.
 - **Input Sanitization**: User input is escaped using `JSON.stringify` before CDP injection.
 
 > 📚 For detailed security information, browser warning bypass instructions, and recommendations, see [SECURITY.md](SECURITY.md).
