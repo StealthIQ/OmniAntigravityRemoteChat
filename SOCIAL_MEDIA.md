@@ -1,3 +1,62 @@
+# Social Media Posts for v0.2.17
+
+---
+
+## LinkedIn Post
+
+Hey network! 👋 I'm excited to announce v0.2.17 of Antigravity Phone Connect! 📱🚀
+
+If you're using Antigravity AI, you know the waiting game. Phone Connect lets you walk away from your desk while keeping full sight and control over your AI's reasoning process right from your phone. 
+
+This update brings some beautiful visual polish and essential under-the-hood tracking:
+✨ Gorgeous new Glassmorphism UI for our settings and quick action bars—giving you a truly premium mobile experience.
+🌙 Enhanced dark mode support with improved model state tracking and CSS filtering so your interface is clean, distraction-free, and legible.
+🧠 Zero disruption with full updates to the latest drops from Gemini, Claude, and OpenAI.
+
+We're pushing to make your remote AI development as seamless and beautiful as possible. Check it out on GitHub! 
+
+https://github.com/krishnakanthb13/antigravity_phone_chat
+
+#OpenSource #DevTools #AI #Antigravity #WebDev #Update
+
+---
+
+## Reddit Post
+
+**Suggested Sub-Reddits:** r/programming, r/webdev, r/SideProject, r/opensource
+**Title:** I built an app to remotely monitor and control Antigravity AI from your phone - Just released v0.2.17 with a new Glassmorphism UI!
+
+Hey everyone!
+
+I've been working on **Antigravity Phone Connect**, a tool that lets you step away from your desk while keeping full sight and control over your Antigravity AI coding sessions. If you've ever felt "tethered" to your computer waiting for a large generation or long thought process to finish, this is for you.
+
+We just pushed v0.2.17, which really hones in on visual polish and compatibility:
+
+✨ **Glassmorphism UI:** We overhauled the mobile quick-action and settings headers using a clean glassmorphism styling. It just feels so much more premium in the hand.
+🌙 **Better Dark Mode & Model Tracking:** Since Antigravity relies heavily on themes (with thousands of CSS variables), we refined our "Aggressive CSS Inheritance" to perfectly mask out desktop scrollbars and correctly map dark mode state. Your AI models (like the newest Claude and Gemini drops) are also tracked flawlessly.
+🧠 **Always Up To Date:** Confirmed support for the latest AI models.
+
+**How it works under the hood (for the curious):**
+Instead of brittle element selection, the Node server establishes a CDP (Chrome DevTools Protocol) bridge to the desktop IDE. It polls the UI, does delta-detection on the HTML hash, dynamically strips out desktop context bars in real-time, and beams it to your phone over WebSocket.
+
+I'd love for you to check out the repo and let me know what you think! 
+
+https://github.com/krishnakanthb13/antigravity_phone_chat
+
+---
+
+## X (Twitter) Post
+
+Just dropped v0.2.17 of Antigravity Phone Connect! 📱✨ 
+
+We added a beautiful new Glassmorphism UI for mobile quick-actions, refined our dark mode tracking, and verified support for the newest Gemini & Claude models. 
+
+Remote AI coding just got sexier. Check it out here! 👇
+
+https://github.com/krishnakanthb13/antigravity_phone_chat
+
+---
+
 # 📣 Social Media Promotion - Antigravity Phone Connect v0.2.x
 
 ## 🔗 LinkedIn

@@ -203,5 +203,6 @@ The system utilizes a unidirectional master-slave architecture for state managem
 To ensure a clean "Observation Mode" on mobile, the server performs an aggressive cleanup of the captured DOM before sending it to the client:
 1.  **Interaction Area Removal**: The entire bottom interaction wrapper (input box, send buttons, model selection) is identified and removed.
 2.  **Context Bar Hiding**: "Review Changes" and "Files With Changes" bars are automatically stripped using structural and keyword-based filtering.
-3.  **Visual Overrides**: Custom CSS injections ensure that Desktop-specific UI elements (like scrollbars or specific borders) are masked or styled for mobile responsiveness.
-4.  **Error-Safe Cleanup**: The filtering logic uses `try-catch` blocks and safe `classList` checks to prevent CDP execution errors when encountering legacy or non-standard SVG elements.
+3.  **Visual Overrides**: Custom CSS injections ensure that Desktop-specific UI elements (like scrollbars or specific borders) are masked. Specifically, a precise **glassmorphism styling** and modern dark-mode tracking are applied to the mobile quick-action and settings headers for enhanced readability and aesthetics.
+4.  **Model State Tracking**: Advanced DOM scraping dynamically tracks active models from Desktop (including the latest Gemini and Claude models), mirroring them seamlessly onto the mobile interface.
+5.  **Error-Safe Cleanup**: The filtering logic uses `try-catch` blocks and safe `classList` checks to prevent CDP execution errors when encountering legacy or non-standard SVG elements.

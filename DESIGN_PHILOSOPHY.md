@@ -15,7 +15,7 @@ Selecting elements in a dynamically changing IDE like Antigravity is brittle. Th
 The snapshot system clones the DOM before capturing. This ensures that the mirroring process doesn't interfere with the developer's cursor, scroll position, or focus on the Desktop machine.
 
 ### 3. Visual Parity (The Dark Mode Bridge)
-Antigravity themes have thousands of CSS variables. Instead of trying to mirror every variable perfectly, we use **Aggressive CSS Inheritance**. The frontend captures the raw HTML and wraps it in a modern, slate-dark UI that feels premium and natively mobile, regardless of the Desktop's theme.
+Antigravity themes have thousands of CSS variables. Instead of trying to mirror every variable perfectly, we use **Aggressive CSS Inheritance**. The frontend captures the raw HTML and wraps it in a modern, slate-dark UI that feels premium and natively mobile, regardless of the Desktop's theme. Recent updates layer this with **Glassmorphism UI components** and fine-tuned dark mode styling, ensuring that settings bars, model states, and quick actions remain frictionlessly readable and highly aesthetically pleasing against dynamic coding backgrounds.
 
 ### 4. Security-First Local Access
 - **HTTPS by Default**: When SSL certificates are generated, the server automatically uses HTTPS.

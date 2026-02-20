@@ -4,6 +4,22 @@ All notable changes to **Antigravity Phone Connect** are documented here, in rev
 
 ---
 
+## v0.2.17 - UI Polish & Model Compatibility 🌟
+**Release Date:** February 20, 2026
+
+---
+
+### 🚀 New Features & Improvements
+- **Glassmorphism UI**: Upgraded the quick actions and settings bars with a gorgeous new glassmorphism effect for a sleek, modern, and premium mobile experience.
+- **Latest AI Models**: Automatically updated and verified support for the latest model versions from Gemini, Claude, and OpenAI to ensure zero disruption.
+- **Improved Dark Mode Tracking**: Enhanced UI styling and state capture logic designed to provide maximum clarity and correct model detection down to the CSS layer while in dark mode.
+
+### 📚 Documentation Updates
+- Updated `README.md` to showcase the new glassmorphism and model coverage features.
+- Synced `CODE_DOCUMENTATION.md` and `DESIGN_PHILOSOPHY.md` to capture recent visual overrides and DOM scraping improvements.
+
+---
+
 ## v0.2.13 - Smart Cleanup & Reliability 🛡️ (supports latest release)
 **Release Date:** February 7, 2026
 
