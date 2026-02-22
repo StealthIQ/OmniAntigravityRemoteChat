@@ -5,6 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.10] - 2026-02-22
+
+### Changed
+
+- 🎨 Redesigned startup banner — open-right style, no ANSI alignment issues
+- 📖 Added Launch Modes documentation (Git Clone vs NPM, ngrok, SSL guides)
+- 🔖 Version bumped across package.json, server.js, README badges
+
+## [0.4.9] - 2026-02-22
+
+### Added
+
+- 🎨 Premium Google CLI-style startup banner with gradient OMNI ASCII art
+- 📖 NPM badges with download counter and npmjs.com links in README
+
+## [0.4.8] - 2026-02-22
+
+### Fixed
+
+- 🐛 Fix `npx` loading wrong `.env` file from `cwd` instead of package directory
+- 🐛 Fix duplicate `join`/`dirname` imports after dotenv refactor
+
+### Added
+
+- 🚀 `publish.yml` — auto-publish to NPM on GitHub Release
+- 🔑 NPM_TOKEN configured as GitHub repo secret
+
+## [0.4.7] - 2026-02-22
+
+### Changed
+
+- ⬆️ `dotenv` 16.x → 17.3.1, `express` 4.18 → 4.22.1
+- 🔧 Node.js minimum: 16 → 22
+- 🔧 CI matrix: Node 18/20/22 → 22/24
+- 📁 `test.js` moved to `test/test.js`
+- 🔧 `launcher.js` default port fixed: 3000 → 4747
+
+## [0.4.6] - 2026-02-22
+
+### Changed
+
+- 📖 Complete README rewrite for v0.4.6 with NPM install instructions
+- 📖 CODE_DOCUMENTATION.md updated with multi-window and UX sections
+- 📖 DESIGN_PHILOSOPHY.md updated with v0.4.x trade-offs
+- 📦 `package.json` NPM metadata: keywords, homepage, repository, contributors
+- 🙏 Acknowledgments to original author Krishna Kanth B
+
+## [0.4.5] - 2026-02-22
+
+### Added
+
+- 🔓 Force-expand all `<details>` and collapsible containers via CSS + JS
+- ⏱️ Extended scroll lock to 15 seconds for user interaction protection
+- 🛡️ Transient 503 protection during window switches
+
+## [0.4.0] - 2026-02-22
+
+### Added
+
+- 🪟 Multi-window management with smart CDP target filtering
+- 🔍 Excludes internal pages (Settings, Launchpad, jetski)
+- 🔄 Retry logic: 2s wait + 5x snapshot retry on window switch
+- 🚀 Launch new Antigravity windows from phone (`POST /api/launch-window`)
+- 📜 Chat history fix: `data.chats` key alignment
+- 🖥️ Clean window display names (removes port numbers and raw titles)
+
 ## [0.3.6] - 2026-02-22
 
 ### Added
