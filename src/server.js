@@ -1076,7 +1076,11 @@ async function getChatHistory(cdp) {
                 awaitPromise: true,
                 contextId: ctx.id
             });
-            if (res.result?.value) return res.result.value;
+            if (res.result?.value) {
+                const val = res.result.value;
+                if (val.success) return val;
+                if (val.error) lastError = val.error;
+            }
             // If result.value is null/undefined but no error thrown, check exceptionDetails
             if (res.exceptionDetails) {
                 lastError = res.exceptionDetails.exception?.description || res.exceptionDetails.text;
@@ -1200,7 +1204,10 @@ async function selectChat(cdp, chatTitle) {
                 awaitPromise: true,
                 contextId: ctx.id
             });
-            if (res.result?.value) return res.result.value;
+            if (res.result?.value) {
+                const val = res.result.value;
+                if (val.success) return val;
+            }
         } catch (e) { }
     }
     return { error: 'Context failed' };
@@ -1225,7 +1232,12 @@ async function hasChatOpen(cdp) {
                 returnByValue: true,
                 contextId: ctx.id
             });
-            if (res.result?.value) return res.result.value;
+            if (res.result?.value) {
+                const val = res.result.value;
+                if (val.hasChat || val.hasMessages || val.editorFound) {
+                    return val;
+                }
+            }
         } catch (e) { }
     }
     return { hasChat: false, hasMessages: false, editorFound: false };
@@ -1312,7 +1324,10 @@ async function getAppState(cdp) {
                 awaitPromise: true,
                 contextId: ctx.id
             });
-            if (res.result?.value) return res.result.value;
+            if (res.result?.value) {
+                const val = res.result.value;
+                if (val.mode !== 'Unknown' || val.model !== 'Unknown') return val;
+            }
         } catch (e) { }
     }
     return { error: 'Context failed' };
