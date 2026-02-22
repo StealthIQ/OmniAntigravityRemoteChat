@@ -17,7 +17,7 @@ import { execSync } from 'child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PORTS = [9000, 9001, 9002, 9003];
+const PORTS = [5000, 5001, 5002, 5003];
 const POLL_INTERVAL = 1000; // 1 second
 const SERVER_PORT = process.env.PORT || 3000;
 const APP_PASSWORD = process.env.APP_PASSWORD || 'antigravity';
@@ -1826,7 +1826,7 @@ async function main() {
         await initCDP();
     } catch (err) {
         console.warn(`⚠️  Initial CDP discovery failed: ${err.message}`);
-        console.log('💡 Start Antigravity with --remote-debugging-port=9000 to connect.');
+        console.log('💡 Start Antigravity with --remote-debugging-port=5000 to connect.');
     }
 
     try {

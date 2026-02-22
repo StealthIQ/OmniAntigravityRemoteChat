@@ -16,8 +16,12 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
-# Check for Python
-if command -v python3 &> /dev/null; then
+# Check for Python (prefer local venv to avoid PEP 668 issues)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/.venv/bin/python3" ]; then
+    PYTHON_CMD="$SCRIPT_DIR/.venv/bin/python3"
+    echo "[INFO] Using project virtualenv Python."
+elif command -v python3 &> /dev/null; then
     PYTHON_CMD="python3"
 elif command -v python &> /dev/null; then
     PYTHON_CMD="python"

@@ -29,8 +29,14 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-# 3. Check Python
-if ! command -v python3 &> /dev/null; then
+# 3. Check Python (prefer local venv)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/.venv/bin/python3" ]; then
+    PYTHON_CMD="$SCRIPT_DIR/.venv/bin/python3"
+    echo "[INFO] Using project virtualenv Python."
+elif command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+else
     echo "[ERROR] Python 3 is not installed."
     exit 1
 fi
@@ -55,7 +61,7 @@ echo "[INFO] .env configuration found."
 # 5. Launch everything via Python
 echo "[1/1] Launching Antigravity Phone Connect..."
 echo "(This will start both the server and the web tunnel)"
-python3 launcher.py --mode web
+$PYTHON_CMD launcher.py --mode web
 
 # 6. Auto-close when done
 exit 0
