@@ -1,5 +1,7 @@
 # OmniAntigravity Remote Chat
 
+![Version](https://img.shields.io/badge/version-0.3.6-6366f1) ![Node](https://img.shields.io/badge/node-16%2B-10b981) ![CI](https://github.com/diegosouzapw/OmniAntigravityRemoteChat/actions/workflows/ci.yml/badge.svg) ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
+
 > 📱 Premium mobile remote control for Antigravity AI sessions — mirror, chat, and manage your AI workflows from your phone.
 
 ## How It Works
@@ -73,17 +75,23 @@ Then just run `agd` to launch in debug mode.
 Choose one of the following:
 
 ```bash
-# Option A: Direct server (simplest)
-node server.js
+# Option A: Direct server
+npm start
 
-# Option B: With QR code for easy phone access (Wi-Fi)
+# Option B: With QR code (Wi-Fi)
 npm run start:local
 
-# Option C: With ngrok tunnel (access from anywhere)
+# Option C: With ngrok tunnel (anywhere)
 npm run start:web
 ```
 
-### Step 7 — Connect from Your Phone
+### Step 7 — Run Validation (optional)
+
+```bash
+npm test    # 25 checks: env, deps, syntax, ports, HTTP, WebSocket
+```
+
+### Step 8 — Connect from Your Phone
 
 1. Make sure your phone is on the **same Wi-Fi network** as your computer
 2. Open the URL shown in the terminal (e.g., `http://192.168.0.xxx:4747`)

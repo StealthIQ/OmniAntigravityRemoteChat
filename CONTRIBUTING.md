@@ -1,19 +1,22 @@
-# CONTRIBUTING - Antigravity Phone Connect
+# CONTRIBUTING - OmniAntigravity Remote Chat
 
-First off, thank you for considering contributing to Antigravity Phone Connect! It's people like you that make the AI development ecosystem so exciting.
+First off, thank you for considering contributing to OmniAntigravity Remote Chat! It's people like you that make the AI development ecosystem so exciting.
 
 ## How to Contribute
 
 ### 1. Reporting Bugs
+
 - **Check existing issues** to see if the bug has already been reported.
 - **Provide context**: What OS are you using? Which port is Antigravity running on? HTTP or HTTPS?
 - **Logs**: Include the output of `server.js` (the console logs) when the error occurred.
 
 ### 2. Suggesting Features
+
 - Open a "Feature Request" on GitHub.
 - Describe the use case (e.g., "I wish I could scroll the desktop from my phone").
 
 ### 3. Development Workflow
+
 1.  **Fork** the repository.
 2.  Create a **new branch** (`git checkout -b feature/amazing-feature`).
 3.  **Implement** your changes.
@@ -45,15 +48,15 @@ First off, thank you for considering contributing to Antigravity Phone Connect! 
 
 ## File Structure Notes
 
-| Directory/File | Purpose |
-| :--- | :--- |
-| `server.js` | Main server - add new API endpoints here |
-| `public/` | Mobile UI files (index.html, css/style.css, js/app.js) |
-| `generate_ssl.js` | SSL cert generator - uses pure Node.js crypto |
-| `certs/` | Generated SSL files - gitignored, never commit |
-| `.env.example` | Template for environment variables |
-| `SECURITY.md` | Security documentation - update for security changes |
-| `*.sh` files | Must have LF line endings for Linux/macOS |
+| Directory/File    | Purpose                                                |
+| :---------------- | :----------------------------------------------------- |
+| `server.js`       | Main server - add new API endpoints here               |
+| `public/`         | Mobile UI files (index.html, css/style.css, js/app.js) |
+| `generate_ssl.js` | SSL cert generator - uses pure Node.js crypto          |
+| `certs/`          | Generated SSL files - gitignored, never commit         |
+| `.env.example`    | Template for environment variables                     |
+| `SECURITY.md`     | Security documentation - update for security changes   |
+| `*.sh` files      | Must have LF line endings for Linux/macOS              |
 
 ## Testing HTTPS
 

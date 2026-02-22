@@ -1,4 +1,4 @@
-# SECURITY - Antigravity Phone Connect
+# SECURITY - OmniAntigravity Remote Chat
 
 This document explains the security model, HTTPS setup, and how to handle browser warnings.
 
@@ -18,22 +18,23 @@ Antigravity Phone Connect supports HTTPS for secure connections between your pho
 
 The `generate_ssl.js` script uses a **hybrid approach**:
 
-| Method | When Used | Benefits |
-|--------|-----------|----------|
-| **OpenSSL** (preferred) | When OpenSSL is installed | Full IP address SAN support, cleaner browser warnings |
-| **Node.js crypto** (fallback) | When OpenSSL not available | Zero dependencies, works everywhere |
+| Method                        | When Used                  | Benefits                                              |
+| ----------------------------- | -------------------------- | ----------------------------------------------------- |
+| **OpenSSL** (preferred)       | When OpenSSL is installed  | Full IP address SAN support, cleaner browser warnings |
+| **Node.js crypto** (fallback) | When OpenSSL not available | Zero dependencies, works everywhere                   |
 
 **OpenSSL availability by platform:**
+
 - **Windows**: Available if Git for Windows is installed
 - **macOS**: LibreSSL built-in (compatible)
 - **Linux**: Usually pre-installed
 
 ### Self-Signed vs CA-Signed Certificates
 
-| Type | Pros | Cons |
-|------|------|------|
-| **Self-Signed** (what we use) | Free, works offline, no domain needed, instant setup | Browser shows warning on first visit |
-| **CA-Signed** (Let's Encrypt, etc.) | No browser warnings | Requires domain name, internet access, periodic renewal |
+| Type                                | Pros                                                 | Cons                                                    |
+| ----------------------------------- | ---------------------------------------------------- | ------------------------------------------------------- |
+| **Self-Signed** (what we use)       | Free, works offline, no domain needed, instant setup | Browser shows warning on first visit                    |
+| **CA-Signed** (Let's Encrypt, etc.) | No browser warnings                                  | Requires domain name, internet access, periodic renewal |
 
 For local network use, **self-signed certificates are the practical choice**.
 
@@ -50,6 +51,7 @@ When you first visit the HTTPS URL on your phone, you'll see a warning like:
 ### Is This Safe?
 
 **Yes, for your local network.** This warning appears because:
+
 1. The certificate is "self-signed" (created by you, not a Certificate Authority)
 2. Your browser doesn't recognize the issuer
 3. This is **expected behavior** for local development servers
@@ -57,23 +59,28 @@ When you first visit the HTTPS URL on your phone, you'll see a warning like:
 ### How to Bypass (By Browser/Device)
 
 #### Android Chrome
+
 1. Tap **"Advanced"** at the bottom of the warning page
 2. Tap **"Proceed to 192.168.1.x (unsafe)"**
 
 #### iPhone Safari
+
 1. Tap **"Show Details"**
 2. Tap **"visit this website"**
 3. Tap **"Visit Website"** in the confirmation popup
 
 #### iPhone Chrome
+
 1. Tap **"Advanced"**
 2. Tap **"Proceed to 192.168.1.x (unsafe)"**
 
 #### Desktop Chrome/Edge
+
 1. Click **"Advanced"**
 2. Click **"Proceed to localhost (unsafe)"**
 
 #### Desktop Firefox
+
 1. Click **"Advanced..."**
 2. Click **"Accept the Risk and Continue"**
 
@@ -83,19 +90,21 @@ When you first visit the HTTPS URL on your phone, you'll see a warning like:
 
 All browsers will show **"Not Secure"** but **"Encrypted"** - this is expected!
 
-| Browser | Icon | Message |
-|---------|------|---------|
-| Chrome (Android/Desktop) | 🔴 Red octagon with X | "Not secure" - but encrypted |
-| Safari (iPhone) | ⚠️ Triangle warning | "Not Trusted" - but encrypted |
-| Firefox | 🔴 Red octagon with X | "Not secure" - but encrypted |
-| Edge | 🔴 Red octagon with X | "Not secure" - but encrypted |
+| Browser                  | Icon                  | Message                       |
+| ------------------------ | --------------------- | ----------------------------- |
+| Chrome (Android/Desktop) | 🔴 Red octagon with X | "Not secure" - but encrypted  |
+| Safari (iPhone)          | ⚠️ Triangle warning   | "Not Trusted" - but encrypted |
+| Firefox                  | 🔴 Red octagon with X | "Not secure" - but encrypted  |
+| Edge                     | 🔴 Red octagon with X | "Not secure" - but encrypted  |
 
 **Why "Not Secure" but still encrypted?**
+
 - ✅ **Your data IS encrypted** with TLS 1.3 / AES-256
 - ❌ The certificate isn't from a trusted Certificate Authority
 - This is **normal and expected** for self-signed certificates
 
 **Key points:**
+
 - ✅ The initial warning won't appear again (until you clear browser data)
 - ✅ All traffic is encrypted with modern TLS 1.3
 - ✅ Tap the icon → "Connection is encrypted" confirms security
@@ -107,18 +116,22 @@ All browsers will show **"Not Secure"** but **"Encrypted"** - this is expected!
 To secure your session when accessing it globally, Antigravity Phone Connect now includes a built-in authentication layer.
 
 ### How it Works
+
 1. **Local Access (Wi-Fi)**: The server detects your local IP. Devices on same Wi-Fi are **automatically authenticated**.
 2. **Global Access (Mobile Data)**: Requests from the internet (via ngrok) require a **Passcode**.
 3. **Session Cookies**: Once logged in, your browser stores a secure, signed cookie valid for 30 days.
 
 ### Configuration
+
 1. Copy `.env.example` to `.env`.
 2. Set your custom password and API keys in the `.env` file:
+
 ```env
 APP_PASSWORD=your_secure_password
 XXX_API_KEY=your-ai-provider-key
 ```
-*If no password is set, the server will generate a **temporary 6-digit passcode** each time it starts and display it in the terminal.*
+
+_If no password is set, the server will generate a **temporary 6-digit passcode** each time it starts and display it in the terminal._
 
 ---
 
@@ -140,19 +153,19 @@ XXX_API_KEY=your-ai-provider-key
 
 ### Remote Access Strategy
 
-| Method | Safety | Recommendation |
-|----------|--------|----------------|
-| **Local Wi-Fi** | 🟢 High | Default mode, no password required. |
-| **_web Mode (ngrok)** | 🟡 Medium | Use `APP_PASSWORD` in `.env` (cloned from `.env.example`) for secure global access. |
-| **Port Forwarding** | 🔴 Low | **NOT RECOMMENDED**. Use the built-in `_web` tunnel instead. |
+| Method                 | Safety    | Recommendation                                                                      |
+| ---------------------- | --------- | ----------------------------------------------------------------------------------- |
+| **Local Wi-Fi**        | 🟢 High   | Default mode, no password required.                                                 |
+| **\_web Mode (ngrok)** | 🟡 Medium | Use `APP_PASSWORD` in `.env` (cloned from `.env.example`) for secure global access. |
+| **Port Forwarding**    | 🔴 Low    | **NOT RECOMMENDED**. Use the built-in `_web` tunnel instead.                        |
 
 ### Recommendations
 
-| Scenario | Recommendation |
-|----------|----------------|
-| Home network (trusted) | Use as-is, HTTPS recommended |
-| Shared network (office) | Enable HTTPS, consider adding auth |
-| Remote access | Use VPN or SSH tunnel, never expose directly to internet |
+| Scenario                | Recommendation                                           |
+| ----------------------- | -------------------------------------------------------- |
+| Home network (trusted)  | Use as-is, HTTPS recommended                             |
+| Shared network (office) | Enable HTTPS, consider adding auth                       |
+| Remote access           | Use VPN or SSH tunnel, never expose directly to internet |
 
 ---
 
@@ -165,12 +178,14 @@ node generate_ssl.js
 ```
 
 **What it does:**
+
 1. Detects your local IP addresses (e.g., 192.168.1.3)
 2. Tries OpenSSL first (if available) - includes IP in certificate SAN
 3. Falls back to Node.js crypto if OpenSSL not found
 4. Creates `certs/server.key` and `certs/server.cert`
 
 **Example output:**
+
 ```
 🔐 Generating self-signed SSL certificate...
 
@@ -188,6 +203,7 @@ node generate_ssl.js
 ### Web UI Method
 
 If you're already running the server on HTTP:
+
 1. Look for the yellow **"⚠️ Not Secure"** banner
 2. Click **"Enable HTTPS"** button
 3. Restart the server when prompted
@@ -219,16 +235,19 @@ Certificates are stored in `./certs/` and are **gitignored** - they will NOT be 
 To check which certificate you're using and its details:
 
 **Windows (with Git):**
+
 ```powershell
 & "C:\Program Files\Git\usr\bin\openssl.exe" x509 -in certs/server.cert -text -noout | Select-String -Pattern "Subject:|Issuer:|Not Before|Not After|DNS:|IP Address:"
 ```
 
 **macOS/Linux:**
+
 ```bash
 openssl x509 -in certs/server.cert -text -noout | grep -E "Subject:|Issuer:|Not Before|Not After|DNS:|IP Address:"
 ```
 
 **Example output:**
+
 ```
 Issuer: C=US, O=AntigravityPhoneConnect, CN=localhost
 Not Before: Jan 17 06:55:13 2026 GMT
@@ -238,6 +257,7 @@ DNS:localhost, IP Address:192.168.1.3, IP Address:127.0.0.1
 ```
 
 **Quick check (any platform):**
+
 ```bash
 node -e "const fs=require('fs'); console.log(fs.existsSync('certs/server.cert') ? '✅ Certificate exists' : '❌ No certificate')"
 ```
@@ -248,7 +268,8 @@ node -e "const fs=require('fs'); console.log(fs.existsSync('certs/server.cert') 
 
 ### Local Network Only
 
-By default, the server binds to `0.0.0.0:3000`, meaning:
+By default, the server binds to `0.0.0.0:4747`, meaning:
+
 - ✅ Accessible from any device on your LAN
 - ✅ Accessible via `localhost` on the host machine
 - ❌ NOT accessible from the internet (unless you port-forward)
@@ -256,8 +277,9 @@ By default, the server binds to `0.0.0.0:3000`, meaning:
 ### Firewall Considerations
 
 If you can't connect from your phone:
+
 1. Check Windows Firewall / macOS Firewall settings
-2. Ensure port 3000 is allowed for Node.js
+2. Ensure port 4747 is allowed for Node.js
 3. Verify both devices are on the same Wi-Fi network
 
 ---
@@ -267,16 +289,19 @@ If you can't connect from your phone:
 For the best certificate experience (proper IP SAN support), install OpenSSL:
 
 ### Windows
+
 - **Easiest**: Install [Git for Windows](https://git-scm.com/) - includes OpenSSL
 - **Standalone**: Download from [slproweb.com](https://slproweb.com/products/Win32OpenSSL.html)
 
 ### macOS
+
 ```bash
 # Already included as LibreSSL, or install via Homebrew:
 brew install openssl
 ```
 
 ### Linux
+
 ```bash
 # Usually pre-installed, or:
 sudo apt install openssl    # Debian/Ubuntu
