@@ -96,7 +96,7 @@ async function startNgrok(port) {
 async function main() {
     banner();
 
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 4747;
     const localIP = getLocalIP();
 
     // Ensure .env exists
