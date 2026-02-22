@@ -186,9 +186,11 @@ async function loadSnapshot() {
         const response = await fetchWithAuth('/snapshot');
         if (!response.ok) {
             if (response.status === 503) {
-                // No snapshot available - likely no chat open
-                chatIsOpen = false;
-                showEmptyState();
+                // No snapshot available - could be transient (target switch) or no chat
+                // Only show empty state if we haven't recently confirmed chat is open
+                if (!chatIsOpen) {
+                    showEmptyState();
+                }
                 return;
             }
             throw new Error('Failed to load');
@@ -1145,6 +1147,16 @@ async function showTargetSelector() {
             if (!target) return;
 
             try {
+                // Show switching state immediately
+                chatContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                        <h2>Switching Window...</h2>
+                        <p>Connecting to: ${target.title}</p>
+                    </div>
+                `;
+                statusText.textContent = 'Switching...';
+
                 const switchRes = await fetchWithAuth('/select-target', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1152,7 +1164,31 @@ async function showTargetSelector() {
                 });
                 const result = await switchRes.json();
                 if (result.success) {
-                    setTimeout(loadSnapshot, 500);
+                    // The server needs time to populate execution contexts
+                    // for the new target. Retry snapshot loading progressively.
+                    chatIsOpen = true; // Assume chat is open until proven otherwise
+                    const retrySnapshot = async (attempt) => {
+                        try {
+                            await loadSnapshot();
+                            // If we got here without 503, snapshot loaded OK
+                            fetchAppState();
+                            checkChatStatus();
+                        } catch (e) {
+                            if (attempt < 5) {
+                                setTimeout(() => retrySnapshot(attempt + 1), 1000);
+                            }
+                        }
+                    };
+                    // Wait 2s for contexts to populate, then start retrying
+                    setTimeout(() => retrySnapshot(0), 2000);
+                } else {
+                    console.error('Target switch failed:', result.error);
+                    chatContent.innerHTML = `
+                        <div class="empty-state">
+                            <h2>Switch Failed</h2>
+                            <p>${result.error || 'Unknown error'}</p>
+                        </div>
+                    `;
                 }
             } catch (e) {
                 console.error('Target switch failed:', e);
