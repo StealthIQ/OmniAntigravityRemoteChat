@@ -2085,7 +2085,7 @@ async function main() {
         const protocol = hasSSL ? 'https' : 'http';
         server.listen(SERVER_PORT, '0.0.0.0', () => {
             const url = `${protocol}://${localIP}:${SERVER_PORT}`;
-            const ver = '0.4.8';
+            const ver = '0.4.9';
 
             // ANSI color helpers
             const R  = '\x1b[0m';
