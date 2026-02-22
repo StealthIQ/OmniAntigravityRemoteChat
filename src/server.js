@@ -1877,20 +1877,6 @@ async function createServer() {
         }
     });
 
-    // Endpoint to list all CDP targets - helpful for debugging connection issues
-    app.get('/cdp-targets', async (req, res) => {
-        const results = {};
-        for (const port of PORTS) {
-            try {
-                const list = await getJson(`http://127.0.0.1:${port}/json/list`);
-                results[port] = list;
-            } catch (e) {
-                results[port] = e.message;
-            }
-        }
-        res.json(results);
-    });
-
     // WebSocket connection with Auth check
     wss.on('connection', (ws, req) => {
         // Parse cookies from headers
