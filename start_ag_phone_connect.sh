@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Antigravity Phone Connect - Mac/Linux Launcher
+# OmniAntigravity Remote Chat - Mac/Linux Launcher
 echo "==================================================="
-echo "  Antigravity Phone Connect Launcher"
+echo "  OmniAntigravity Remote Chat Launcher"
 echo "==================================================="
 
 # Check for .env file
@@ -16,25 +16,17 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
-# Check for Python (prefer local venv to avoid PEP 668 issues)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ -f "$SCRIPT_DIR/.venv/bin/python3" ]; then
-    PYTHON_CMD="$SCRIPT_DIR/.venv/bin/python3"
-    echo "[INFO] Using project virtualenv Python."
-elif command -v python3 &> /dev/null; then
-    PYTHON_CMD="python3"
-elif command -v python &> /dev/null; then
-    PYTHON_CMD="python"
-else
-    echo "[ERROR] Python is not installed. Please install Python to run the launcher."
+# Check for Node.js
+if ! command -v node &> /dev/null; then
+    echo "[ERROR] Node.js is not installed. Please install Node.js 16+ to continue."
     exit 1
 fi
 
-echo "[STARTING] Launching via Unified Launcher..."
-$PYTHON_CMD launcher.py --mode local
+# Launch using Node.js launcher (no Python needed)
+echo "[INFO] Starting OmniAntigravity Remote Chat..."
+node launcher.js --mode local
 
 # Keep terminal open if server crashes
 echo ""
 echo "[INFO] Server stopped."
 read -p "Press Enter to exit..."
-

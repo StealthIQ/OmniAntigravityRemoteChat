@@ -150,6 +150,9 @@ function connectWebSocket() {
         if (data.type === 'snapshot_update' && autoRefreshEnabled && !userIsScrolling) {
             loadSnapshot();
         }
+        if (data.type === 'cdp_status') {
+            handleCDPStatus(data.status);
+        }
     };
 
     ws.onclose = () => {
@@ -1000,10 +1003,84 @@ chatContainer.addEventListener('click', async (e) => {
 
 // --- Init ---
 connectWebSocket();
-// Sync state initially and every 5 seconds to keep phone in sync with desktop changes
 fetchAppState();
 setInterval(fetchAppState, 5000);
-
-// Check chat status initially and periodically
 checkChatStatus();
 setInterval(checkChatStatus, 10000); // Check every 10 seconds
+
+// --- CDP Status Toast (Phase 5: Auto-Reconnect UI) ---
+let cdpToast = null;
+function handleCDPStatus(status) {
+    // Remove existing toast
+    if (cdpToast) { cdpToast.remove(); cdpToast = null; }
+
+    if (status === 'reconnecting') {
+        cdpToast = document.createElement('div');
+        cdpToast.id = 'cdp-toast';
+        cdpToast.innerHTML = '⏳ Reconnecting to Antigravity...';
+        cdpToast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3);animation:slideDown 0.3s ease';
+        document.body.appendChild(cdpToast);
+        statusDot.classList.remove('connected');
+        statusDot.classList.add('disconnected');
+        statusText.textContent = 'Reconnecting';
+    } else if (status === 'connected') {
+        cdpToast = document.createElement('div');
+        cdpToast.id = 'cdp-toast';
+        cdpToast.innerHTML = '✅ Connected!';
+        cdpToast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3);animation:slideDown 0.3s ease';
+        document.body.appendChild(cdpToast);
+        statusDot.classList.remove('disconnected');
+        statusDot.classList.add('connected');
+        statusText.textContent = 'Live';
+        loadSnapshot();
+        setTimeout(() => { if (cdpToast) { cdpToast.remove(); cdpToast = null; } }, 3000);
+    }
+}
+
+// --- Multi-Window Target Selector (Phase 3) ---
+async function showTargetSelector() {
+    try {
+        const res = await fetchWithAuth('/cdp-targets');
+        const data = await res.json();
+
+        if (!data.targets || data.targets.length <= 1) {
+            // Only one target, no need to show selector
+            if (data.targets?.length === 0) {
+                openModal('No Windows Found', ['No Antigravity instances detected'], () => {});
+            }
+            return;
+        }
+
+        const titles = data.targets.map(t => {
+            const active = t.id === data.activeTarget ? ' ✅' : '';
+            return `${t.title} (port ${t.port})${active}`;
+        });
+
+        openModal('Select Antigravity Window', titles, async (selected) => {
+            const idx = titles.indexOf(selected);
+            const target = data.targets[idx];
+            if (!target) return;
+
+            try {
+                const switchRes = await fetchWithAuth('/select-target', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetId: target.id })
+                });
+                const result = await switchRes.json();
+                if (result.success) {
+                    setTimeout(loadSnapshot, 500);
+                }
+            } catch (e) {
+                console.error('Target switch failed:', e);
+            }
+        });
+    } catch (e) {
+        console.error('Failed to fetch targets:', e);
+    }
+}
+
+// Inject slideDown animation
+const toastStyle = document.createElement('style');
+toastStyle.textContent = '@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+document.head.appendChild(toastStyle);

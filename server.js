@@ -17,11 +17,11 @@ import { execSync } from 'child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PORTS = [5000, 5001, 5002, 5003];
+const PORTS = [9000, 9001, 9002, 9003];
 const POLL_INTERVAL = 1000; // 1 second
 const SERVER_PORT = process.env.PORT || 3000;
 const APP_PASSWORD = process.env.APP_PASSWORD || 'antigravity';
-const AUTH_COOKIE_NAME = 'ag_auth_token';
+const AUTH_COOKIE_NAME = 'omni_ag_auth';
 // Note: hashString is defined later, so we'll initialize the token inside createServer or use a simple string for now.
 let AUTH_TOKEN = 'ag_default_token';
 
@@ -30,6 +30,8 @@ let AUTH_TOKEN = 'ag_default_token';
 let cdpConnection = null;
 let lastSnapshot = null;
 let lastSnapshotHash = null;
+let availableTargets = []; // Multi-window: all discovered targets
+let activeTargetId = null; // Currently connected target identifier
 
 // Kill any existing process on the server port (prevents EADDRINUSE)
 function killPortProcess(port) {
@@ -136,6 +138,29 @@ async function discoverCDP() {
     }
     const errorSummary = errors.length ? `Errors: ${errors.join(', ')}` : 'No ports responding';
     throw new Error(`CDP not found. ${errorSummary}`);
+}
+
+// Discover ALL available CDP targets across all ports (multi-window)
+async function discoverAllCDP() {
+    const allTargets = [];
+    for (const port of PORTS) {
+        try {
+            const list = await getJson(`http://127.0.0.1:${port}/json/list`);
+            for (const t of list) {
+                if (t.webSocketDebuggerUrl && (t.url?.includes('workbench.html') || t.title?.includes('workbench') || t.url?.includes('jetski') || t.title === 'Launchpad')) {
+                    allTargets.push({
+                        id: `${port}:${t.id}`,
+                        port,
+                        title: t.title || 'Untitled',
+                        url: t.url,
+                        wsUrl: t.webSocketDebuggerUrl,
+                        type: t.url?.includes('workbench') ? 'workbench' : 'other'
+                    });
+                }
+            }
+        } catch (e) { /* port not responding */ }
+    }
+    return allTargets;
 }
 
 // Connect to CDP
@@ -1286,19 +1311,45 @@ async function initCDP() {
     console.log(`✅ Connected! Found ${cdpConnection.contexts.length} execution contexts\n`);
 }
 
-// Background polling
+// Background polling with exponential backoff & CDP status broadcast
 async function startPolling(wss) {
     let lastErrorLog = 0;
     let isConnecting = false;
+    let reconnectDelay = 2000; // Start at 2s, max 30s
+    const MAX_RECONNECT_DELAY = 30000;
+    let reconnectAttempts = 0;
+    let heartbeatInterval = null;
+
+    // WebSocket ping/pong heartbeat (every 30s)
+    heartbeatInterval = setInterval(() => {
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.ping();
+            }
+        });
+    }, 30000);
+
+    // Broadcast CDP status to all mobile clients
+    function broadcastCDPStatus(status) {
+        const msg = JSON.stringify({ type: 'cdp_status', status, timestamp: new Date().toISOString() });
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) client.send(msg);
+        });
+    }
 
     const poll = async () => {
+        // Periodically refresh available targets list (multi-window)
+        try {
+            availableTargets = await discoverAllCDP();
+        } catch (e) { /* ignore */ }
+
         if (!cdpConnection || (cdpConnection.ws && cdpConnection.ws.readyState !== WebSocket.OPEN)) {
             if (!isConnecting) {
                 console.log('🔍 Looking for Antigravity CDP connection...');
                 isConnecting = true;
+                broadcastCDPStatus('reconnecting');
             }
             if (cdpConnection) {
-                // Was connected, now lost
                 console.log('🔄 CDP connection lost. Attempting to reconnect...');
                 cdpConnection = null;
             }
@@ -1307,11 +1358,18 @@ async function startPolling(wss) {
                 if (cdpConnection) {
                     console.log('✅ CDP Connection established from polling loop');
                     isConnecting = false;
+                    reconnectDelay = 2000; // Reset backoff
+                    reconnectAttempts = 0;
+                    broadcastCDPStatus('connected');
                 }
             } catch (err) {
-                // Not found yet, just wait for next cycle
+                reconnectAttempts++;
+                reconnectDelay = Math.min(reconnectDelay * 1.5, MAX_RECONNECT_DELAY);
+                if (reconnectAttempts % 5 === 0) {
+                    console.log(`   ⏳ Reconnect attempt #${reconnectAttempts} (next in ${Math.round(reconnectDelay/1000)}s)`);
+                }
             }
-            setTimeout(poll, 2000); // Try again in 2 seconds if not found
+            setTimeout(poll, reconnectDelay);
             return;
         }
 
@@ -1320,12 +1378,10 @@ async function startPolling(wss) {
             if (snapshot && !snapshot.error) {
                 const hash = hashString(snapshot.html);
 
-                // Only update if content changed
                 if (hash !== lastSnapshotHash) {
                     lastSnapshot = snapshot;
                     lastSnapshotHash = hash;
 
-                    // Broadcast to all connected clients
                     wss.clients.forEach(client => {
                         if (client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify({
@@ -1338,7 +1394,6 @@ async function startPolling(wss) {
                     console.log(`📸 Snapshot updated(hash: ${hash})`);
                 }
             } else {
-                // Snapshot is null or has error
                 const now = Date.now();
                 if (!lastErrorLog || now - lastErrorLog > 10000) {
                     const errorMsg = snapshot?.error || 'No valid snapshot captured (check contexts)';
@@ -1826,7 +1881,7 @@ async function main() {
         await initCDP();
     } catch (err) {
         console.warn(`⚠️  Initial CDP discovery failed: ${err.message}`);
-        console.log('💡 Start Antigravity with --remote-debugging-port=5000 to connect.');
+        console.log('💡 Start Antigravity with --remote-debugging-port=9000 to connect.');
     }
 
     try {
@@ -1841,6 +1896,42 @@ async function main() {
             if (!cdpConnection) return res.status(503).json({ error: 'CDP disconnected' });
             const result = await clickElement(cdpConnection, { selector, index, textContent });
             res.json(result);
+        });
+
+        // Multi-Window: List all available CDP targets
+        app.get('/cdp-targets', async (req, res) => {
+            res.json({
+                targets: availableTargets,
+                activeTarget: activeTargetId,
+                connected: !!cdpConnection
+            });
+        });
+
+        // Multi-Window: Switch to a different CDP target
+        app.post('/select-target', async (req, res) => {
+            const { targetId } = req.body;
+            if (!targetId) return res.status(400).json({ error: 'targetId required' });
+
+            const target = availableTargets.find(t => t.id === targetId);
+            if (!target) return res.status(404).json({ error: 'Target not found. Refresh targets.' });
+
+            try {
+                // Close existing connection
+                if (cdpConnection?.ws) {
+                    cdpConnection.ws.close();
+                    cdpConnection = null;
+                }
+
+                console.log(`🔀 Switching to target: ${target.title} (port ${target.port})`);
+                cdpConnection = await connectCDP(target.wsUrl);
+                activeTargetId = targetId;
+                lastSnapshot = null;
+                lastSnapshotHash = null;
+                console.log(`✅ Connected to: ${target.title}`);
+                res.json({ success: true, target: target.title });
+            } catch (err) {
+                res.status(500).json({ error: `Failed to connect: ${err.message}` });
+            }
         });
 
         // Remote Scroll - sync phone scroll to desktop
