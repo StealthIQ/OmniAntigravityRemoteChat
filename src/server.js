@@ -12,7 +12,7 @@ import WebSocket from 'ws';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { inspectUI } from './ui_inspector.js';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -70,6 +70,58 @@ function killPortProcess(port) {
         // No process found on port - this is fine
         return Promise.resolve();
     }
+}
+
+// Check if a specific port is in use
+async function isPortFree(port) {
+    return new Promise((resolve) => {
+        const server = http.createServer();
+        server.once('error', (err) => {
+            if (err.code === 'EADDRINUSE') resolve(false);
+            else resolve(true);
+        });
+        server.once('listening', () => {
+            server.close();
+            resolve(true);
+        });
+        server.listen(port);
+    });
+}
+
+// Launch a new Antigravity instance on the next available port
+async function launchAntigravity() {
+    console.log('🚀 Attempting to launch a new Antigravity window...');
+    
+    // Antigravity core base port starts above 7800
+    let targetPort = null;
+    for (let port = 7800; port <= 7850; port++) {
+        const free = await isPortFree(port);
+        if (free) {
+            targetPort = port;
+            break;
+        }
+    }
+    
+    if (!targetPort) {
+        throw new Error("Could not find a free port between 7800-7850 to launch Antigravity");
+    }
+
+    if (!PORTS.includes(targetPort)) {
+        PORTS.push(targetPort);
+    }
+    
+    console.log(`Starting antigravity on port ${targetPort}...`);
+    // Use spawn to start antigravity detached
+    const subprocess = spawn('antigravity', [`--port=${targetPort}`], {
+        detached: true,
+        stdio: 'ignore' // We don't need its stdout
+    });
+    
+    subprocess.unref(); // Allow the parent Node process to exit independently
+    
+    // Give it a moment to boot up before returning
+    await new Promise(r => setTimeout(r, 2500));
+    return targetPort;
 }
 
 // Get local IP address for mobile access
@@ -1443,8 +1495,18 @@ async function createServer() {
 
     const wss = new WebSocketServer({ server });
 
-    // Initialize Auth Token (wait for hashString to be available)
-    AUTH_TOKEN = hashString(APP_PASSWORD + 'antigravity_salt');
+    // Initialize session security & token
+    AUTH_TOKEN = hashString(APP_PASSWORD + Date.now().toString());
+
+    // Check for --launch argument
+    if (process.argv.includes('--launch')) {
+        console.log('CLI flag --launch detected. Spawning new Antigravity instance...');
+        try {
+            await launchAntigravity();
+        } catch (e) {
+            console.error('Failed to auto-launch Antigravity:', e.message);
+        }
+    }
 
     app.use(compression());
     app.use(express.json());
@@ -1978,6 +2040,19 @@ async function main() {
             if (!cdpConnection) return res.json({ hasChat: false, hasMessages: false, editorFound: false });
             const result = await hasChatOpen(cdpConnection);
             res.json(result);
+        });
+
+        // Launch a new window
+        app.post('/api/launch-window', async (req, res) => {
+            try {
+                const newPort = await launchAntigravity();
+                // We don't automatically connect here; the polling loop will see it 
+                // and the user can select it via the UI context menu.
+                res.json({ success: true, port: newPort });
+            } catch (err) {
+                console.error('Failed to launch new window:', err);
+                res.status(500).json({ error: err.message });
+            }
         });
 
         // Kill any existing process on the port before starting

@@ -1046,12 +1046,41 @@ chatContainer.addEventListener('click', async (e) => {
     }
 });
 
+// --- Auto-Scroll Observer ---
+let scrollObserver = null;
+function initScrollObserver() {
+    if (scrollObserver) return;
+    
+    scrollObserver = new MutationObserver(() => {
+        if (!chatContainer || !chatContent) return;
+        
+        const scrollPos = chatContainer.scrollTop;
+        const scrollHeight = chatContainer.scrollHeight;
+        const clientHeight = chatContainer.clientHeight;
+        const isNearBottom = (scrollHeight - scrollPos - clientHeight) < 150;
+        
+        const isUserScrollLocked = Date.now() < userScrollLockUntil;
+
+        // Auto-scroll to bottom if user is not actively reading up-chat
+        if (!isUserScrollLocked && (isNearBottom || scrollPos === 0)) {
+            chatContainer.scrollTo({
+                top: scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    });
+    
+    // We observe the chatContent for any new elements (bot typing)
+    scrollObserver.observe(chatContent, { childList: true, subtree: true, characterData: true });
+}
+
 // --- Init ---
 connectWebSocket();
 fetchAppState();
 setInterval(fetchAppState, 5000);
 checkChatStatus();
 setInterval(checkChatStatus, 10000); // Check every 10 seconds
+initScrollObserver();
 
 // --- CDP Status Toast (Phase 5: Auto-Reconnect UI) ---
 let cdpToast = null;
@@ -1088,21 +1117,30 @@ async function showTargetSelector() {
         const res = await fetchWithAuth('/cdp-targets');
         const data = await res.json();
 
-        if (!data.targets || data.targets.length <= 1) {
-            // Only one target, no need to show selector
-            if (data.targets?.length === 0) {
-                openModal('No Windows Found', ['No Antigravity instances detected'], () => {});
-            }
-            return;
+        // Include a static "Launch New Window" option
+        const LAUNCH_OPTION = '🚀 + Launch New Window';
+        let options = [];
+
+        if (data.targets && data.targets.length > 0) {
+            options = data.targets.map(t => {
+                const isActive = t.id === data.activeTarget;
+                return isActive ? `✅ ${t.title} (Active)` : `🖥️ ${t.title} (port ${t.port})`;
+            });
+        } else {
+            options = ['No Antigravity instances detected'];
         }
+        
+        options.push(LAUNCH_OPTION);
 
-        const titles = data.targets.map(t => {
-            const active = t.id === data.activeTarget ? ' ✅' : '';
-            return `${t.title} (port ${t.port})${active}`;
-        });
+        openModal('Select Antigravity Window', options, async (selected) => {
+            if (selected === 'No Antigravity instances detected') return;
+            
+            if (selected === LAUNCH_OPTION) {
+                launchNewWindow();
+                return;
+            }
 
-        openModal('Select Antigravity Window', titles, async (selected) => {
-            const idx = titles.indexOf(selected);
+            const idx = options.indexOf(selected);
             const target = data.targets[idx];
             if (!target) return;
 
@@ -1122,6 +1160,28 @@ async function showTargetSelector() {
         });
     } catch (e) {
         console.error('Failed to fetch targets:', e);
+    }
+}
+
+async function launchNewWindow() {
+    try {
+        const btn = document.getElementById('windowBtn');
+        if (btn) btn.innerText = 'Launching...';
+        
+        const res = await fetchWithAuth('/api/launch-window', { method: 'POST' });
+        const data = await res.json();
+        
+        if (btn) btn.innerText = 'Window';
+
+        if (data.success) {
+            console.log('Launched new window on port', data.port);
+            setTimeout(() => showTargetSelector(), 3000);
+        } else {
+            alert('Failed to launch window: ' + data.error);
+        }
+    } catch (e) {
+        console.error('Launch failed:', e);
+        alert('Failed to launch window');
     }
 }
 
