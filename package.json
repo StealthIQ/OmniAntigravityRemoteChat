@@ -4,8 +4,8 @@
     "type": "module",
     "description": "Premium mobile remote control for Antigravity AI sessions via CDP mirroring",
     "scripts": {
-        "start": "node server.js",
-        "dev": "node server.js",
+        "start": "node src/server.js",
+        "dev": "node src/server.js",
         "start:local": "node launcher.js --mode local",
         "start:web": "node launcher.js --mode web",
         "test": "node test.js"

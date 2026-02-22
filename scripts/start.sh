@@ -1,20 +1,11 @@
 #!/bin/bash
 
-# OmniAntigravity Remote Chat - Mac/Linux Launcher
+# OmniAntigravity Remote Chat - Local Launcher
+cd "$(dirname "$0")/.."
+
 echo "==================================================="
 echo "  OmniAntigravity Remote Chat Launcher"
 echo "==================================================="
-
-# Check for .env file
-if [ ! -f ".env" ]; then
-    if [ -f ".env.example" ]; then
-        echo "[INFO] .env file not found. Creating from .env.example..."
-        cp .env.example .env
-        echo "[SUCCESS] .env created from template!"
-        echo "[ACTION] Please update .env if you wish to change defaults."
-        echo ""
-    fi
-fi
 
 # Check for Node.js
 if ! command -v node &> /dev/null; then
@@ -22,11 +13,19 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-# Launch using Node.js launcher (no Python needed)
+# Check for .env file
+if [ ! -f ".env" ]; then
+    if [ -f ".env.example" ]; then
+        echo "[INFO] .env file not found. Creating from .env.example..."
+        cp .env.example .env
+        echo "[SUCCESS] .env created!"
+    fi
+fi
+
+# Launch using Node.js launcher
 echo "[INFO] Starting OmniAntigravity Remote Chat..."
 node launcher.js --mode local
 
-# Keep terminal open if server crashes
 echo ""
 echo "[INFO] Server stopped."
 read -p "Press Enter to exit..."

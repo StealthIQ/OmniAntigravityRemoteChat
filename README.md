@@ -149,17 +149,30 @@ This checks:
 ## Project Structure
 
 ```
-├── server.js          # Main server (Express + WebSocket + CDP)
-├── launcher.js        # Node.js launcher (QR, ngrok, env)
-├── test.js            # Validation test suite
+├── src/
+│   ├── server.js          # Main server (Express + WebSocket + CDP)
+│   └── ui_inspector.js    # UI inspection utilities
 ├── public/
-│   ├── index.html     # Mobile chat interface
-│   ├── login.html     # Login page (web access mode)
-│   ├── css/style.css  # Premium dark UI styles
-│   └── js/app.js      # Client-side logic
-├── .env.example       # Environment template
-├── package.json       # Dependencies and scripts
-└── start_ag_phone_connect.sh      # Shell launcher (local)
+│   ├── index.html         # Mobile chat interface
+│   ├── login.html         # Login page
+│   ├── css/style.css      # Premium dark UI styles
+│   └── js/app.js          # Client-side logic
+├── scripts/
+│   ├── start.sh / .bat    # Local launcher
+│   ├── start_web.sh / .bat # Web (ngrok) launcher
+│   ├── generate_ssl.js    # SSL certificate generator
+│   └── install_context_menu.sh / .bat
+├── docs/
+│   ├── CODE_DOCUMENTATION.md
+│   ├── DESIGN_PHILOSOPHY.md
+│   ├── RELEASE_NOTES.md
+│   ├── SECURITY.md
+│   └── CONTRIBUTING.md
+├── launcher.js            # Node.js launcher (QR, ngrok)
+├── test.js                # Validation test suite
+├── package.json           # Dependencies and scripts
+├── README.md              # This file
+└── .env.example           # Environment template
 ```
 
 ---

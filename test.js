@@ -120,7 +120,7 @@ async function main() {
     // ─── 3. Syntax Validation ─────────────────────────────────
     section('Syntax Validation');
 
-    const filesToCheck = ['server.js', 'launcher.js'];
+    const filesToCheck = ['src/server.js', 'launcher.js'];
     for (const file of filesToCheck) {
         try {
             execSync(`node --check ${file}`, { cwd: __dirname, stdio: 'pipe' });
@@ -186,7 +186,7 @@ async function main() {
     if (!serverPortFree) {
         warn('Skipping server test — port in use');
     } else {
-        const serverProc = spawn('node', ['server.js'], {
+        const serverProc = spawn('node', ['src/server.js'], {
             cwd: __dirname,
             env: { ...process.env, PORT: String(SERVER_PORT) },
             stdio: 'pipe'

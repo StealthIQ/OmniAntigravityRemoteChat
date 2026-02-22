@@ -16,6 +16,7 @@ import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const PROJECT_ROOT = join(__dirname, '..');
 
 const PORTS = [7800, 7801, 7802, 7803];
 const POLL_INTERVAL = 1000; // 1 second
@@ -1422,8 +1423,8 @@ async function createServer() {
     const app = express();
 
     // Check for SSL certificates
-    const keyPath = join(__dirname, 'certs', 'server.key');
-    const certPath = join(__dirname, 'certs', 'server.cert');
+    const keyPath = join(PROJECT_ROOT, 'certs', 'server.key');
+    const certPath = join(PROJECT_ROOT, 'certs', 'server.cert');
     const hasSSL = fs.existsSync(keyPath) && fs.existsSync(certPath);
 
     let server;
@@ -1492,7 +1493,7 @@ async function createServer() {
         }
     });
 
-    app.use(express.static(join(__dirname, 'public')));
+    app.use(express.static(join(PROJECT_ROOT, 'public')));
 
     // Login endpoint
     app.post('/login', (req, res) => {
@@ -1537,8 +1538,8 @@ async function createServer() {
 
     // SSL status endpoint
     app.get('/ssl-status', (req, res) => {
-        const keyPath = join(__dirname, 'certs', 'server.key');
-        const certPath = join(__dirname, 'certs', 'server.cert');
+        const keyPath = join(PROJECT_ROOT, 'certs', 'server.key');
+        const certPath = join(PROJECT_ROOT, 'certs', 'server.cert');
         const certsExist = fs.existsSync(keyPath) && fs.existsSync(certPath);
         res.json({
             enabled: hasSSL,
@@ -1553,7 +1554,7 @@ async function createServer() {
     app.post('/generate-ssl', async (req, res) => {
         try {
             const { execSync } = await import('child_process');
-            execSync('node generate_ssl.js', { cwd: __dirname, stdio: 'pipe' });
+            execSync('node scripts/generate_ssl.js', { cwd: PROJECT_ROOT, stdio: 'pipe' });
             res.json({
                 success: true,
                 message: 'SSL certificates generated! Restart the server to enable HTTPS.'

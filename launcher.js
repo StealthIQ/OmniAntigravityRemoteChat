@@ -109,7 +109,7 @@ async function main() {
 
     // Start the Node.js server
     console.log(`${c.blue}  ▶ Starting server...${c.reset}`);
-    const server = spawn('node', ['server.js'], {
+    const server = spawn('node', [join(__dirname, 'src', 'server.js')], {
         cwd: __dirname,
         stdio: 'inherit',
         env: { ...process.env }
