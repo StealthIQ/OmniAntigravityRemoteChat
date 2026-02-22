@@ -111,6 +111,50 @@ npm test    # 25 checks: env, deps, syntax, ports, HTTP, WebSocket
 
 ---
 
+## HTTPS Setup (Trusted Certificate)
+
+Run one command to get HTTPS with **zero browser warnings**:
+
+```bash
+npm run setup:ssl
+```
+
+This automatically:
+
+1. Installs **mkcert** (if not present)
+2. Creates a local Certificate Authority
+3. Generates trusted SSL certificates
+4. Server auto-detects certs on next start → green padlock 🔒
+
+### Manual Install (if auto-install fails)
+
+| OS                | Command                                          |
+| ----------------- | ------------------------------------------------ |
+| **Ubuntu/Debian** | `sudo apt install mkcert`                        |
+| **Arch**          | `sudo pacman -S mkcert`                          |
+| **Fedora**        | `sudo dnf install mkcert`                        |
+| **macOS**         | `brew install mkcert`                            |
+| **Windows**       | `choco install mkcert` or `scoop install mkcert` |
+
+Then run: `npm run setup:ssl`
+
+### 📱 Mobile (Optional — Zero Warnings on Phone Too)
+
+To get trusted HTTPS on your phone, install the CA certificate:
+
+**Android:**
+
+1. Find the CA file: `mkcert -CAROOT` → copy `rootCA.pem` to phone
+2. Settings → Security → Install certificate → select the file
+
+**iOS:**
+
+1. Transfer `rootCA.pem` to phone (AirDrop, email, etc.)
+2. Settings → Profile Downloaded → Install
+3. Settings → General → About → Certificate Trust Settings → Enable
+
+---
+
 ## Features
 
 - 📱 **Mobile Remote Control** — Send messages, switch modes/models from your phone
@@ -126,10 +170,11 @@ npm test    # 25 checks: env, deps, syntax, ports, HTTP, WebSocket
 ## npm Scripts
 
 ```bash
-npm start          # Start server directly
+npm start             # Start server directly
 npm run start:local   # Launch with QR code (Wi-Fi mode)
 npm run start:web     # Launch with ngrok (internet mode)
-npm test           # Run validation test suite
+npm run setup:ssl     # Generate trusted HTTPS certificates
+npm test              # Run validation test suite
 ```
 
 ---

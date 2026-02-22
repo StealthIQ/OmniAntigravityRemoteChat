@@ -8,6 +8,7 @@
         "dev": "node src/server.js",
         "start:local": "node launcher.js --mode local",
         "start:web": "node launcher.js --mode web",
+        "setup:ssl": "node scripts/setup-ssl.js",
         "test": "node test.js"
     },
     "dependencies": {
