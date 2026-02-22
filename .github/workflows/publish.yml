@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    name: Release & Publish to NPM
+    name: Release & Publish
     runs-on: ubuntu-latest
 
     permissions:
@@ -44,20 +44,17 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install & verify
         if: steps.version.outputs.changed == 'true'
-        run: npm ci
-
-      - name: Syntax check
-        if: steps.version.outputs.changed == 'true'
-        run: node --check src/server.js
+        run: |
+          npm ci
+          node --check src/server.js
 
       - name: Generate release notes
         if: steps.version.outputs.changed == 'true'
         id: notes
         run: |
           VERSION="${{ steps.version.outputs.new }}"
-          # Extract changelog section for this version
           NOTES=$(awk "/^## \[$VERSION\]/{found=1; next} /^## \[/{if(found) exit} found" CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES=$(git log --oneline HEAD~5..HEAD --format="- %s")
@@ -82,3 +79,26 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Login to Docker Hub
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push Docker image
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            diegosouzapw/omni-antigravity-remote-chat:${{ steps.version.outputs.new }}
+            diegosouzapw/omni-antigravity-remote-chat:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

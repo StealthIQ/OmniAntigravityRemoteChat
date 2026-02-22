@@ -48,7 +48,18 @@ omni-chat
 npx omni-antigravity-remote-chat
 ```
 
-### Option C — Clone Repository
+### Option C — Docker
+
+```bash
+docker run -d --name omni-chat \
+  --network host \
+  -e APP_PASSWORD=your_password \
+  diegosouzapw/omni-antigravity-remote-chat:latest
+```
+
+> 🐳 [View on Docker Hub](https://hub.docker.com/r/diegosouzapw/omni-antigravity-remote-chat)
+
+### Option D — Clone Repository
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniAntigravityRemoteChat.git
